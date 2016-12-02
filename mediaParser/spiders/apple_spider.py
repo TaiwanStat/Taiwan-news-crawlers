@@ -1,5 +1,8 @@
 import scrapy
 import urllib.request
+import re
+import w3lib.url
+# -- coding: utf-8 --
 
 class AppleSpider(scrapy.Spider):
     name = "apple"
@@ -16,7 +19,10 @@ class AppleSpider(scrapy.Spider):
                 continue
             elif news.css("a::attr(href)").extract_first().find("http://ent.appledaily.com.tw/") > -1 :
                 url = news.css("a::attr(href)").extract_first()
-                url = urllib.open(url, None, 1).geturl()
+                url = w3lib.url.canonicalize_url(url)
+                url = urllib.request.urlopen(url, None, 1).geturl()
+                m = re.search('entertainment\/(\d*\/\d*\/)', url).group(1);
+                url = 'http://ent.appledaily.com.tw/section/article/headline/'+m;
             else:
                 url = "http://www.appledaily.com.tw" + news.css("a::attr(href)").extract_first()
             if url is not None:
@@ -29,10 +35,11 @@ class AppleSpider(scrapy.Spider):
         counter = 0;
         content = "";
         title = "";
+        date =  time.strftime('%Y-%m-%d')
         for p in response.css("div.articulum p"):
-            content += "\n"+(p.css("::text").extract_first() if (p.css("::text")) else "");
+            content += " "+(p.css("::text").extract_first() if ((p.css("p::text")).extract_first()) else "");
             if(counter<h2_num):
-                content += "\n"+h2[counter];
+                content += " "+h2[counter];
                 counter = counter +1
         if response.css("hgroup h1::text"):
             title += response.css("hgroup h1::text").extract_first()
@@ -42,7 +49,7 @@ class AppleSpider(scrapy.Spider):
             'website':"蘋果日報",
             'url': response.url,
             'title': title,
-            'date':response.css("div.gggs time::text").extract_first(),
+            'date':date,
             'content': content,
             'category':response.css("meta[name=\"keywords\"]::attr(content)").extract_first()
         }
