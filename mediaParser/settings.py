@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from scrapy.exporters import JsonItemExporter
 
 # Scrapy settings for mediaParser project
 #
@@ -88,3 +89,11 @@ ROBOTSTXT_OBEY = True
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+class MyJsonItemExporter(JsonItemExporter):
+    def __init__(self, file, **kwargs):
+        super(MyJsonItemExporter, self).__init__(file, ensure_ascii=False, **kwargs)
+
+FEED_EXPORTERS = {
+    'json': 'mediaParser.settings.MyJsonItemExporter',
+}
