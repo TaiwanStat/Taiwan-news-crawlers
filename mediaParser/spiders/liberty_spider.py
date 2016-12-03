@@ -18,7 +18,7 @@ CATEGORY_DIC = {
     'world': '國際',
     'business': '財經',
     'entertainment': '娛樂',
-    'consumter': '消費',
+    'consumer': '消費',
     'supplement': '副刊',
     'sports': '體育'
 }
