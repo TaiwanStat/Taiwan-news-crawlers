@@ -61,14 +61,6 @@ class AppleSpider(scrapy.Spider):
                 counter += 1
 
         yield {
-            'website': "中央通訊社",
-            'url': response.url,
-            'title': title,
-            'date': date,
-            'content': content,
-            'category': category
-        }
-        yield {
             'website': "蘋果日報",
             'url': response.url,
             'title': title,
