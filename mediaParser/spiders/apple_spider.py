@@ -54,12 +54,20 @@ class AppleSpider(scrapy.Spider):
         content = ""
         counter = 0
         for p in response.css("div.articulum p"):
-            if p.css("p::text").extract_first():
-                content += " " + p.css("::text").extract_first()
+            if p.css("p::text"):
+                content += ' '.join(p.css("p::text").extract())
             if counter < h2_num:
                 content += " " + h2[counter]
                 counter += 1
 
+        yield {
+            'website': "中央通訊社",
+            'url': response.url,
+            'title': title,
+            'date': date,
+            'content': content,
+            'category': category
+        }
         yield {
             'website': "蘋果日報",
             'url': response.url,
