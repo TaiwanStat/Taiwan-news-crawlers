@@ -121,6 +121,6 @@ def get_news_content(response, h4_query, p_query):
         if counter < h4_num:
             content += " " + h4[counter]
             counter += 1
-        if p.css("p::text").extract_first():
-            content += " " + p.css('p::text').extract_first()
+        if p.css("p::text"):
+            content += ' '.join(p.css("p::text").extract())
     return content
