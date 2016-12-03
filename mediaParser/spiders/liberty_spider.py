@@ -1,157 +1,126 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+自由時報
+"""
 import scrapy
 import time
 import re
+
+ROOT_URL = 'http://news.ltn.com.tw'
+CATEGORY_DIC = {
+    'focus': '焦點',
+    'politics': '政治',
+    'society': '社會',
+    'local': '地方',
+    'life': '生活',
+    'opinion': '言論',
+    'world': '國際',
+    'business': '財經',
+    'entertainment': '娛樂',
+    'consumter': '消費',
+    'supplement': '副刊',
+    'sports': '體育'
+}
+
 
 class LibertySpider(scrapy.Spider):
     name = "liberty"
 
     def start_requests(self):
-        url = [
-        'http://news.ltn.com.tw/newspaper/focus/',
-        'http://news.ltn.com.tw/newspaper/politics/',
-        'http://news.ltn.com.tw/newspaper/society/',
-        'http://news.ltn.com.tw/newspaper/local/',
-        'http://news.ltn.com.tw/newspaper/life/',
-        'http://news.ltn.com.tw/newspaper/opinion/',
-        'http://news.ltn.com.tw/newspaper/world/',
-        'http://news.ltn.com.tw/newspaper/business/',
-        'http://news.ltn.com.tw/newspaper/sports/',
-        'http://news.ltn.com.tw/newspaper/entertainment/',
-        'http://news.ltn.com.tw/newspaper/consumer/',
-        'http://news.ltn.com.tw/newspaper/supplement/'
+        urls = [
+            'http://news.ltn.com.tw/newspaper/focus/',
+            'http://news.ltn.com.tw/newspaper/politics/',
+            'http://news.ltn.com.tw/newspaper/society/',
+            'http://news.ltn.com.tw/newspaper/local/',
+            'http://news.ltn.com.tw/newspaper/life/',
+            'http://news.ltn.com.tw/newspaper/opinion/',
+            'http://news.ltn.com.tw/newspaper/world/',
+            'http://news.ltn.com.tw/newspaper/business/',
+            'http://news.ltn.com.tw/newspaper/sports/',
+            'http://news.ltn.com.tw/newspaper/entertainment/',
+            'http://news.ltn.com.tw/newspaper/consumer/',
+            'http://news.ltn.com.tw/newspaper/supplement/'
         ]
 
-        date =time.strftime('%Y%m%d')
-        #date = '20161202'
-        for urls in url:
-            target = urls + date
-            yield scrapy.Request(target, callback = self.parse)
+        date = time.strftime('%Y%m%d')
+        for url in urls:
+            target = url + date
+            yield scrapy.Request(target, callback=self.parse_news_list)
 
-    def parse(self, response):
-        now_page = int ( response.css('div#page strong::text').extract_first() )
-        pages = response.css('div#page a::text').extract()
-        
-        pages_int = []
-        isTheEnd = 1
+    def parse_news_list(self, response):
+        for news_item in response.css('a.picword'):
+            relative_url = news_item.css('a::attr(href)').extract_first()
+            abs_url = response.urljoin(relative_url)
+            yield scrapy.Request(abs_url, callback=self.parse_news)
 
-        for page in pages:
-            pages_int.append(int(page))
+        page_list = [int(p) for p in response.css('#page a::text').extract()]
+        current_page = int(response.css('#page strong::text').extract_first())
 
-        for element in pages_int:
-            if element > now_page:
-                isTheEnd = 0
-                now_page = now_page +1
-                break
+        if not page_list or current_page != page_list[0]:
+            return
 
-        if (response.url.find("page") > -1) & (isTheEnd == 0):
-            url = response.url[:-1]+str(now_page)
-            if url is not None:
-                url = response.urljoin(url)
-                yield scrapy.Request(url, callback=self.parse)
+        for page in page_list:
+            if page > current_page:
+                if 'page' in response.url:
+                    relative_url = response.url[:-1] + str(page)
+                else:
+                    relative_url = response.url + '?page='+str(page)
 
-        if (response.url.find("page") == -1) & (isTheEnd == 0):
-            url = response.url+'?page='+str(now_page)
-            if url is not None:
-                url = response.urljoin(url)
-                yield scrapy.Request(url, callback=self.parse)
-
-        for news in response.css('a.picword'):
-            url = 'http://news.ltn.com.tw'+news.css('a::attr(href)').extract_first();
-            if url is not None:
-                url = response.urljoin(url)
-                yield scrapy.Request(url, callback = self.parse_news)
+                abs_url = response.urljoin(relative_url)
+                yield scrapy.Request(abs_url, callback=self.parse_news_list)
 
     def parse_news(self, response):
+        category = get_news_category(response)
 
-        if((re.search('\/news\/([a-z]*)\/', response.url) is not None) and (re.search('\/news\/([a-z]*)\/', response.url).group(1)!='paper')):
-            category = re.search('\/news\/([a-z]*)\/', response.url).group(1)
-        elif ( response.url.find("talk") > -1 ):
-            category = 'opinion'
-        elif ( response.url.find("sports") > -1 ):
-            category = 'sports'
-        elif ( response.url.find("ent") > -1 ):
-            category = 'entertainment'
-
-        if category=='talk':
+        if category == 'talk':
             title = response.css('h2::text').extract_first()
         else:
             title = response.css('h1::text').extract_first()
 
-        date = time.strftime('%Y-%m-%d')
-        
-
-        if category=='opinion':
-            h4 = response.css('.cont h4::text').extract()
-            h4_num = len(h4)
-            counter = 0
-            content = ""
-            for p in response.css(".cont p"):
-                if(counter<h4_num):
-                    content += " "+h4[counter]
-                    counter = counter +1
-                content += " "+(p.css('p::text').extract_first() if ((p.css("p::text")).extract_first()) else "");
+        if category == 'opinion':
+            content = get_news_content(response,
+                                            '.cont h4::text', '.cont p')
         elif category == 'sports':
-            h4 = response.css('.news_p h4::text').extract()
-            h4_num = len(h4)
-            counter = 0
-            content = ""
-            for p in response.css(".news_p p"):
-                if(counter<h4_num):
-                    content += " "+h4[counter]
-                    counter = counter +1
-                content += " "+(p.css('p::text').extract_first() if ((p.css("p::text")).extract_first()) else "");
+            content = get_news_content(response,
+                                            '.news_p h4::text', '.news_p p')
         elif category == 'entertainment':
-            h4 = response.css('.news_content p').extract()
-            h4_num = len(h4)
-            counter = 0
-            content = ""
-            for p in response.css(".news_content p"):
-                if(counter<h4_num):
-                    content += " "+h4[counter]
-                    counter = counter +1
-                content += " "+(p.css('p::text').extract_first() if ((p.css("p::text")).extract_first()) else "");
+            content = get_news_content(response, '.news_content h4::text',
+                                            '.news_content p')
         else:
-            h4 = response.css('div#newstext h4::text').extract()
-            h4_num = len(h4)
-            counter = 0
-            content = ""
-            for p in response.css("div#newstext p"):
-                if(counter<h4_num):
-                    content += " "+h4[counter]
-                    counter = counter +1
-                content += " "+(p.css('p::text').extract_first() if ((p.css("p::text")).extract_first()) else "");
-        
-        if category == 'focus':
-            category = '焦點'
-        elif category == 'politics':
-            category = '政治'
-        elif category == 'society':
-            category = '社會'
-        elif category == 'local':
-            category = '地方'
-        elif category == 'life':
-            category = '生活'
-        elif category == 'opinion':
-            category = '言論'
-        elif category == 'world':
-            category = '國際'
-        elif category == 'business':
-            category = '財經'
-        elif category == 'entertainment':
-            category = '娛樂'
-        elif category == 'consumer':
-            category = '消費'
-        elif category == 'supplement':
-            category = '副刊'
-        elif category == 'sports':
-            category = '體育'
-           
+            content = get_news_content(response, '#newstext h4::text',
+                                            '#newstext p')
 
-        yield{
-            'website':"自由時報",
+        yield {
+            'website': "自由時報",
             'url': response.url,
             'title': title,
-            'date':date,
+            'date': time.strftime('%Y-%m-%d'),
             'content': content,
-            'category': category
+            'category': CATEGORY_DIC[category]
         }
+
+def get_news_category(response):
+    searched_category = re.search('\/news\/([a-z]*)\/', response.url)
+
+    if searched_category and searched_category.group(1) != 'paper':
+        return searched_category.group(1)
+    elif 'talk' in response.url:
+        return 'opinion'
+    elif 'sports' in response.url:
+        return 'sports'
+    elif 'ent' in response.url:
+        return 'entertainment'
+
+def get_news_content(response, h4_query, p_query):
+    h4 = response.css(h4_query).extract()
+    h4_num = len(h4)
+    counter = 0
+    content = ""
+    for p in response.css(p_query):
+        if counter < h4_num:
+            content += " " + h4[counter]
+            counter += 1
+        if p.css("p::text").extract_first():
+            content += " " + p.css('p::text').extract_first()
+    return content
