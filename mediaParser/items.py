@@ -9,6 +9,9 @@ import scrapy
 
 
 class MediaparserItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+    website = scrapy.Field()
+    url = scrapy.Field()
+    title = scrapy.Field()
+    date = scrapy.Field()
+    content = scrapy.Field()
+    category = scrapy.Field()
