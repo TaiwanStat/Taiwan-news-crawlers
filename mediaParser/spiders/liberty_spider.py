@@ -57,7 +57,7 @@ class LibertySpider(scrapy.Spider):
         page_list = [int(p) for p in response.css('#page a::text').extract()]
         current_page = int(response.css('#page strong::text').extract_first())
 
-        if not page_list or current_page != page_list[0]:
+        if not page_list or current_page >= max(page_list):
             return
 
         for page in page_list:
@@ -73,7 +73,7 @@ class LibertySpider(scrapy.Spider):
     def parse_news(self, response):
         category = get_news_category(response)
 
-        if category == 'talk':
+        if category == 'opinion':
             title = response.css('h2::text').extract_first()
         else:
             title = response.css('h1::text').extract_first()
