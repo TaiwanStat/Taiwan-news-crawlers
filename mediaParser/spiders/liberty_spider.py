@@ -9,18 +9,18 @@ import re
 
 ROOT_URL = 'http://news.ltn.com.tw'
 CATEGORY_DIC = {
-    # 'focus': '焦點',
-    # 'politics': '政治',
-    # 'society': '社會',
+    'focus': '焦點',
+    'politics': '政治',
+    'society': '社會',
     'local': '地方',
-    # 'life': '生活',
-    # 'opinion': '言論',
-    # 'world': '國際',
-    # 'business': '財經',
-    # 'entertainment': '娛樂',
-    # 'consumer': '消費',
-    # 'supplement': '副刊',
-    # 'sports': '體育'
+    'life': '生活',
+    'opinion': '言論',
+    'world': '國際',
+    'business': '財經',
+    'entertainment': '娛樂',
+    'consumer': '消費',
+    'supplement': '副刊',
+    'sports': '體育'
 }
 
 
@@ -29,18 +29,18 @@ class LibertySpider(scrapy.Spider):
 
     def start_requests(self):
         urls = [
-            # 'http://news.ltn.com.tw/newspaper/focus/',
-            # 'http://news.ltn.com.tw/newspaper/politics/',
-            # 'http://news.ltn.com.tw/newspaper/society/',
+            'http://news.ltn.com.tw/newspaper/focus/',
+            'http://news.ltn.com.tw/newspaper/politics/',
+            'http://news.ltn.com.tw/newspaper/society/',
             'http://news.ltn.com.tw/newspaper/local/',
-            # 'http://news.ltn.com.tw/newspaper/life/',
-            # 'http://news.ltn.com.tw/newspaper/opinion/',
-            # 'http://news.ltn.com.tw/newspaper/world/',
-            # 'http://news.ltn.com.tw/newspaper/business/',
-            # 'http://news.ltn.com.tw/newspaper/sports/',
-            # 'http://news.ltn.com.tw/newspaper/entertainment/',
-            # 'http://news.ltn.com.tw/newspaper/consumer/',
-            # 'http://news.ltn.com.tw/newspaper/supplement/'
+            'http://news.ltn.com.tw/newspaper/life/',
+            'http://news.ltn.com.tw/newspaper/opinion/',
+            'http://news.ltn.com.tw/newspaper/world/',
+            'http://news.ltn.com.tw/newspaper/business/',
+            'http://news.ltn.com.tw/newspaper/sports/',
+            'http://news.ltn.com.tw/newspaper/entertainment/',
+            'http://news.ltn.com.tw/newspaper/consumer/',
+            'http://news.ltn.com.tw/newspaper/supplement/'
         ]
 
         date = time.strftime('%Y%m%d')
