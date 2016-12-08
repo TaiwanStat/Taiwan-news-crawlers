@@ -9,18 +9,18 @@ import re
 
 ROOT_URL = 'http://news.ltn.com.tw'
 CATEGORY_DIC = {
-    'focus': '焦點',
-    'politics': '政治',
-    'society': '社會',
+    # 'focus': '焦點',
+    # 'politics': '政治',
+    # 'society': '社會',
     'local': '地方',
-    'life': '生活',
-    'opinion': '言論',
-    'world': '國際',
-    'business': '財經',
-    'entertainment': '娛樂',
-    'consumer': '消費',
-    'supplement': '副刊',
-    'sports': '體育'
+    # 'life': '生活',
+    # 'opinion': '言論',
+    # 'world': '國際',
+    # 'business': '財經',
+    # 'entertainment': '娛樂',
+    # 'consumer': '消費',
+    # 'supplement': '副刊',
+    # 'sports': '體育'
 }
 
 
@@ -29,18 +29,18 @@ class LibertySpider(scrapy.Spider):
 
     def start_requests(self):
         urls = [
-            'http://news.ltn.com.tw/newspaper/focus/',
-            'http://news.ltn.com.tw/newspaper/politics/',
-            'http://news.ltn.com.tw/newspaper/society/',
+            # 'http://news.ltn.com.tw/newspaper/focus/',
+            # 'http://news.ltn.com.tw/newspaper/politics/',
+            # 'http://news.ltn.com.tw/newspaper/society/',
             'http://news.ltn.com.tw/newspaper/local/',
-            'http://news.ltn.com.tw/newspaper/life/',
-            'http://news.ltn.com.tw/newspaper/opinion/',
-            'http://news.ltn.com.tw/newspaper/world/',
-            'http://news.ltn.com.tw/newspaper/business/',
-            'http://news.ltn.com.tw/newspaper/sports/',
-            'http://news.ltn.com.tw/newspaper/entertainment/',
-            'http://news.ltn.com.tw/newspaper/consumer/',
-            'http://news.ltn.com.tw/newspaper/supplement/'
+            # 'http://news.ltn.com.tw/newspaper/life/',
+            # 'http://news.ltn.com.tw/newspaper/opinion/',
+            # 'http://news.ltn.com.tw/newspaper/world/',
+            # 'http://news.ltn.com.tw/newspaper/business/',
+            # 'http://news.ltn.com.tw/newspaper/sports/',
+            # 'http://news.ltn.com.tw/newspaper/entertainment/',
+            # 'http://news.ltn.com.tw/newspaper/consumer/',
+            # 'http://news.ltn.com.tw/newspaper/supplement/'
         ]
 
         date = time.strftime('%Y%m%d')
@@ -60,15 +60,16 @@ class LibertySpider(scrapy.Spider):
         if not page_list or current_page >= max(page_list):
             return
 
-        for page in page_list:
-            if page > current_page:
-                if 'page' in response.url:
-                    relative_url = response.url[:-1] + str(page)
-                else:
-                    relative_url = response.url + '?page='+str(page)
+        next_page = current_page+1
 
-                abs_url = response.urljoin(relative_url)
-                yield scrapy.Request(abs_url, callback=self.parse_news_list)
+        if next_page in page_list:
+            if 'page' in response.url:
+                relative_url = response.url[:-1] + str(next_page)
+            else:
+                relative_url = response.url + '?page='+str(next_page)
+
+            abs_url = response.urljoin(relative_url)
+            yield scrapy.Request(abs_url, callback=self.parse_news_list)
 
     def parse_news(self, response):
         category = get_news_category(response)
