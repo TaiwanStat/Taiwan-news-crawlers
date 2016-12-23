@@ -19,23 +19,30 @@ class AppleSpider(scrapy.Spider):
     def parse(self, response):
         headline_url = 'http://ent.appledaily.com.tw/section/article/headline/'
 
-        for news in response.css("ul.fillup li"):
-            if 'eat-travel' in news.css("a::attr(href)").extract_first():
-                continue
-            elif 'ent.appledaily' in news.css("a::attr(href)").extract_first():
-                # Get redirected url
-                url = news.css("a::attr(href)").extract_first()
-                url = w3lib.url.canonicalize_url(url)
-                url = urllib.request.urlopen(url, None, 1).geturl()
-                postfix = re.search('entertainment\/(\d*\/\d*\/)',
-                                    url).group(1)
-                url = headline_url + postfix
+        section = response.css('section.nclnbx.slvl.clearmen, article.nclns')
+        for part in section:
+            if part.css('header.schh h1::text'):
+                category = part.css('header.schh h1::text').extract_first()
+                category = category.strip()
             else:
-                url = "http://www.appledaily.com.tw{}".format(
-                            news.css("a::attr(href)").extract_first())
-            if url:
-                url = response.urljoin(url)
-                yield scrapy.Request(url, callback=self.parse_news)
+                meta = {'category': category}
+                for news in part.css('ul.fillup li'):
+                    if 'eat-travel' in news.css("a::attr(href)").extract_first():
+                        continue
+                    elif 'ent.appledaily' in news.css("a::attr(href)").extract_first():
+                        # Get redirected url
+                        url = news.css("a::attr(href)").extract_first()
+                        url = w3lib.url.canonicalize_url(url)
+                        url = urllib.request.urlopen(url, None, 1).geturl()
+                        postfix = re.search('entertainment\/(\d*\/\d*\/)',
+                                            url).group(1)
+                        url = headline_url + postfix
+                    else:
+                        url = "http://www.appledaily.com.tw{}".format(
+                                    news.css("a::attr(href)").extract_first())
+                    if url:
+                        url = response.urljoin(url)
+                        yield scrapy.Request(url, callback=self.parse_news, meta=meta)
 
     def parse_news(self, response):
         date = time.strftime('%Y-%m-%d')
@@ -66,5 +73,5 @@ class AppleSpider(scrapy.Spider):
             'title': title,
             'date': date,
             'content': content,
-            'category': category
+            'category': response.meta['category']
         }
