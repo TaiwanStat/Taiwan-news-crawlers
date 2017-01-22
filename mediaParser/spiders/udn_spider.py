@@ -18,6 +18,7 @@ class UdnSpider(scrapy.Spider):
     def parse(self, response):
         for news in response.css('td a'):
             url = news.css('a::attr(href)').extract_first()
+            url = response.urljoin(url)
             yield scrapy.Request(url, callback=self.parse_news)
 
         # Auto-parse next page
