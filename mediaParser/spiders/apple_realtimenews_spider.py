@@ -42,10 +42,10 @@ class AppleRealtimenewsSpider(scrapy.Spider):
         news_date = datetime.strptime(news_date, "%Y/%m/%d/")
         if today != news_date.date():
             return
-        t_h1 = response.css('hgroup h1::text')
+        t_h1 = response.css('h1#h1::text')
         if t_h1:
             title += t_h1.extract_first()
-        t_h2 = response.css('hgroup h2::text')
+        t_h2 = response.css('h2#h2::text')
         if t_h2:
             title += t_h2.extract_first()
 

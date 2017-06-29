@@ -37,6 +37,8 @@ class AppleSpider(scrapy.Spider):
                         postfix = re.search('entertainment\/(\d*\/\d*\/)',
                                             url).group(1)
                         url = headline_url + postfix
+                    elif 'http' in news.css("a::attr(href)").extract_first():
+                        url = news.css("a::attr(href)").extract_first()
                     else:
                         url = "http://www.appledaily.com.tw{}".format(
                                     news.css("a::attr(href)").extract_first())
@@ -49,10 +51,10 @@ class AppleSpider(scrapy.Spider):
         category = response.css('meta[name=\"keywords\"]::attr(content)')\
                            .extract_first()
         title = ""
-        t_h1 = response.css('hgroup h1::text')
+        t_h1 = response.css('h1#h1::text')
         if t_h1:
             title += t_h1.extract_first()
-        t_h2 = response.css('hgroup h2::text')
+        t_h2 = response.css('h2#h2::text')
         if t_h2:
             title += t_h2.extract_first()
 

@@ -29,18 +29,18 @@ class LibertySpider(scrapy.Spider):
 
     def start_requests(self):
         urls = [
-            'http://news.ltn.com.tw/newspaper/focus/',
-            'http://news.ltn.com.tw/newspaper/politics/',
-            'http://news.ltn.com.tw/newspaper/society/',
-            'http://news.ltn.com.tw/newspaper/local/',
-            'http://news.ltn.com.tw/newspaper/life/',
-            'http://news.ltn.com.tw/newspaper/opinion/',
-            'http://news.ltn.com.tw/newspaper/world/',
-            'http://news.ltn.com.tw/newspaper/business/',
-            'http://news.ltn.com.tw/newspaper/sports/',
-            'http://news.ltn.com.tw/newspaper/entertainment/',
-            'http://news.ltn.com.tw/newspaper/consumer/',
-            'http://news.ltn.com.tw/newspaper/supplement/'
+            'http://news.ltn.com.tw/list/newspaper/focus/',
+            'http://news.ltn.com.tw/list/newspaper/politics/',
+            'http://news.ltn.com.tw/list/newspaper/society/',
+            'http://news.ltn.com.tw/list/newspaper/local/',
+            'http://news.ltn.com.tw/list/newspaper/life/',
+            'http://news.ltn.com.tw/list/newspaper/opinion/',
+            'http://news.ltn.com.tw/list/newspaper/world/',
+            'http://news.ltn.com.tw/list/newspaper/business/',
+            'http://news.ltn.com.tw/list/newspaper/sports/',
+            'http://news.ltn.com.tw/list/newspaper/entertainment/',
+            'http://news.ltn.com.tw/list/newspaper/consumer/',
+            'http://news.ltn.com.tw/list/newspaper/supplement/'
         ]
 
         date = time.strftime('%Y%m%d')
@@ -49,25 +49,22 @@ class LibertySpider(scrapy.Spider):
             yield scrapy.Request(target, callback=self.parse_news_list)
 
     def parse_news_list(self, response):
-        for news_item in response.css('a.picword'):
-            relative_url = news_item.css('a::attr(href)').extract_first()
+        for news_item in response.css('.list li'):
+            relative_url = news_item.css('a.tit::attr(href)').extract_first()
             abs_url = response.urljoin(relative_url)
             yield scrapy.Request(abs_url, callback=self.parse_news)
 
-        page_list = [int(p) for p in response.css('#page a::text').extract()]
-        current_page = int(response.css('#page strong::text').extract_first())
-
-        if not page_list or current_page >= max(page_list):
+        page_list = [int(p) for p in response.css('.pagination a::text').extract() if p.isdigit()]
+        current_page_extract = response.css('.pagination a.active::text').extract_first()
+        current_page = int(current_page_extract) if current_page_extract is True else 1
+        if (not page_list) or (current_page >= max(page_list)):
             return
 
-        next_page = current_page+1
+        next_page = current_page + 1
 
         if next_page in page_list:
-            if 'page' in response.url:
-                relative_url = response.url[:-1] + str(next_page)
-            else:
-                relative_url = response.url + '?page='+str(next_page)
-
+            prefix = re.search('.*\/',response.url).group(0)
+            relative_url = prefix + '/' + str(next_page)
             abs_url = response.urljoin(relative_url)
             yield scrapy.Request(abs_url, callback=self.parse_news_list)
 
@@ -89,8 +86,8 @@ class LibertySpider(scrapy.Spider):
             content = get_news_content(response, '.news_content h4::text',
                                             '.news_content p')
         else:
-            content = get_news_content(response, '#newstext h4::text',
-                                            '#newstext p')
+            content = get_news_content(response, '.text h4::text',
+                                            '.text p')
 
         yield {
             'website': "自由時報",
