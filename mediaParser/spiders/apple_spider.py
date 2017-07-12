@@ -1,14 +1,16 @@
+"""
+蘋果日報新聞
+the crawl deal with apple's news
+Usage: scrapy crawl apple -o <filename.json>
+"""
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
-蘋果日報
-"""
-import scrapy
-import urllib.request
-import re
-import time
-import w3lib.url
 
+import time
+import re
+import urllib.request
+import w3lib.url
+import scrapy
 
 class AppleSpider(scrapy.Spider):
     name = "apple"
@@ -34,22 +36,19 @@ class AppleSpider(scrapy.Spider):
                         url = news.css("a::attr(href)").extract_first()
                         url = w3lib.url.canonicalize_url(url)
                         url = urllib.request.urlopen(url, None, 1).geturl()
-                        postfix = re.search('entertainment\/(\d*\/\d*\/)',
+                        postfix = re.search(r'entertainment\/(\d*\/\d*\/)',
                                             url).group(1)
                         url = headline_url + postfix
                     elif 'http' in news.css("a::attr(href)").extract_first():
                         url = news.css("a::attr(href)").extract_first()
                     else:
-                        url = "http://www.appledaily.com.tw{}".format(
-                                    news.css("a::attr(href)").extract_first())
+                        url = "http://www.appledaily.com.tw{}".format(news.css("a::attr(href)").extract_first())
                     if url:
                         url = response.urljoin(url)
                         yield scrapy.Request(url, callback=self.parse_news, meta=meta)
 
     def parse_news(self, response):
         date = time.strftime('%Y-%m-%d')
-        category = response.css('meta[name=\"keywords\"]::attr(content)')\
-                           .extract_first()
         title = ""
         t_h1 = response.css('h1#h1::text')
         if t_h1:

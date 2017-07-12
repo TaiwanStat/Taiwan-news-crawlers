@@ -1,11 +1,13 @@
+"""
+the crawl deal with tags of liberty's news, which could make the dictionary of jieba
+Usage: scrapy crawl liberty_tag -o <filename.json>
+"""
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
-自由時報
-"""
-import scrapy
 import re
 import datetime
+import scrapy
+
 
 ROOT_URL = 'http://news.ltn.com.tw'
 OLDEST_DATA_YEAR = 2015
@@ -43,12 +45,12 @@ class LibertySpider(scrapy.Spider):
             'http://news.ltn.com.tw/list/newspaper/consumer/',
             'http://news.ltn.com.tw/list/newspaper/supplement/'
         ]
-        
+
         day = datetime.timedelta(days=1)
         NEWS_DATE_BEGIN = datetime.date(OLDEST_DATA_YEAR, 1, 1)
         TODAY = datetime.date.today()
         current_time = NEWS_DATE_BEGIN
-        
+
         while current_time <= TODAY:
             date = current_time.strftime('%Y%m%d')
             for url in urls:
@@ -71,7 +73,7 @@ class LibertySpider(scrapy.Spider):
         next_page = current_page + 1
 
         if next_page in page_list:
-            prefix = re.search('.*\/',response.url).group(0)
+            prefix = re.search(r'.*\/', response.url).group(0)
             relative_url = prefix + '/' + str(next_page)
             abs_url = response.urljoin(relative_url)
             yield scrapy.Request(abs_url, callback=self.parse_news_list)

@@ -1,19 +1,19 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 聯合報
+the crawl deal with udn's news
+Usage: scrapy crawl udn -o <filename.json>
 """
-import scrapy
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from datetime import date, timedelta
+import scrapy
 
 YESTERDAY = (date.today() - timedelta(1)).strftime('%Y/%m/%d')
 
 
 class UdnSpider(scrapy.Spider):
     name = "udn"
-    start_urls = [
-                   'http://udn.com/news/archive/0/0/{}/1'.format(YESTERDAY)
-                 ]
+    start_urls = ['http://udn.com/news/archive/0/0/{}/1'.format(YESTERDAY)]
 
     def parse(self, response):
         for news in response.css('td a'):
@@ -33,7 +33,7 @@ class UdnSpider(scrapy.Spider):
 
     def parse_news(self, response):
         title = response.css('h1::text').extract_first()
-        date = response.css('.story_bady_info_author::text').extract_first()
+        date_of_news = response.css('.story_bady_info_author::text').extract_first()
 
         content = ""
         for p in response.css('p'):
@@ -48,7 +48,7 @@ class UdnSpider(scrapy.Spider):
             'website': "聯合報",
             'url': response.url,
             'title': title,
-            'date': date,
+            'date': date_of_news,
             'content': content,
             'category': category
         }

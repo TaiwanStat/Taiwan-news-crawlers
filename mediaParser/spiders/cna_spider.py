@@ -1,14 +1,34 @@
+"""
+the crawl deal with cna's news
+Usage: scrapy crawl cna -o <filename.json>
+"""
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+from datetime import datetime
 import scrapy
 
+ROOT_URL = 'http://www.cna.com.tw'
+TODAY = datetime.today().date()
 
 class EbcSpider(scrapy.Spider):
     name = "cna"
-    start_urls = [
-                  'http://www.cna.com.tw/list/aall-1.aspx'
-                 ]
+    start_urls = ['http://www.cna.com.tw/list/aall-1.aspx']
 
     def parse(self, response):
-        cna_url = 'http://www.cna.com.tw'
+        current_page_index = int(response.css('.pagination li.current a::text').extract_first())
+
+        newses_time_str = response.css('.article_list li span::text').extract()
+        newses_time = [datetime.strptime(i, '%Y/%m/%d %H:%M').date() for i in newses_time_str]
+        is_over_today = False
+
+        for t in newses_time:
+            if t < TODAY:
+                is_over_today = True
+
+        if not is_over_today:
+            next_url = 'http://www.cna.com.tw/list/aall-' + str(current_page_index + 1) + '.aspx'
+            yield scrapy.Request(next_url, callback=self.parse)
+
         for news in response.css('div.article_list li a'):
             url = response.urljoin(news.css('a::attr(href)').extract_first())
             yield scrapy.Request(url, callback=self.parse_news)

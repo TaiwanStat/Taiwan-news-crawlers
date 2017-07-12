@@ -1,12 +1,12 @@
+"""
+the crawl deal with ettoday's news
+Usage: scrapy crawl ettoday -o <filename.json>
+"""
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
-東森時報
-"""
-import scrapy
-from scrapy.selector import Selector
 import time
-import re
+import scrapy
+
 
 TODAY = time.strftime('%Y/%m/%d')
 TODAY_URL = time.strftime('%Y-%m-%d')
@@ -41,7 +41,7 @@ class EttodaySpider(scrapy.Spider):
 
             response.meta['category'] = category
             yield scrapy.Request(url, callback=self.parse_news, meta=response.meta)
-        if(has_next_page):
+        if has_next_page:
             tFile = time.strftime('%Y%m%d') + '.xml'
             yield scrapy.FormRequest(url="http://www.ettoday.net/show_roll.php",
                                      callback=self.parse_news_list,
@@ -51,7 +51,7 @@ class EttodaySpider(scrapy.Spider):
                                                'tFile': tFile,
                                                'tOt': '0',
                                                'tSi': '100'
-                                               })
+                                              })
 
         # get scroll news list
         # yield scrapy.Request(url, callback=self.parse_news_list)

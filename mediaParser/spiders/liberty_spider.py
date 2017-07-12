@@ -1,11 +1,14 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 自由時報
+the crawl deal with liberty's news
+Usage: scrapy crawl liberty -o <filename.json>
 """
-import scrapy
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import time
 import re
+import scrapy
+
 
 ROOT_URL = 'http://news.ltn.com.tw'
 CATEGORY_DIC = {
@@ -63,7 +66,7 @@ class LibertySpider(scrapy.Spider):
         next_page = current_page + 1
 
         if next_page in page_list:
-            prefix = re.search('.*\/',response.url).group(0)
+            prefix = re.search(r'.*\/', response.url).group(0)
             relative_url = prefix + '/' + str(next_page)
             abs_url = response.urljoin(relative_url)
             yield scrapy.Request(abs_url, callback=self.parse_news_list)
@@ -78,16 +81,16 @@ class LibertySpider(scrapy.Spider):
 
         if category == 'opinion':
             content = get_news_content(response,
-                                            '.cont h4::text', '.cont p')
+                                       '.cont h4::text', '.cont p')
         elif category == 'sports':
             content = get_news_content(response,
-                                            '.news_p h4::text', '.news_p p')
+                                       '.news_p h4::text', '.news_p p')
         elif category == 'entertainment':
             content = get_news_content(response, '.news_content h4::text',
-                                            '.news_content p')
+                                       '.news_content p')
         else:
             content = get_news_content(response, '.text h4::text',
-                                            '.text p')
+                                       '.text p')
 
         yield {
             'website': "自由時報",
@@ -99,7 +102,7 @@ class LibertySpider(scrapy.Spider):
         }
 
 def get_news_category(response):
-    searched_category = re.search('\/news\/([a-z]*)\/', response.url)
+    searched_category = re.search(r'\/news\/([a-z]*)\/', response.url)
 
     if searched_category and searched_category.group(1) != 'paper':
         return searched_category.group(1)

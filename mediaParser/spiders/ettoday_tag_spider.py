@@ -1,12 +1,12 @@
+"""
+the crawl deal with tags of ettoday's news, which could make the dictionary of jieba
+Usage: scrapy crawl ettoday_tag -o <filename.json>
+"""
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
-東森時報
-"""
-import scrapy
-from scrapy.selector import Selector
 import datetime
-import re
+import scrapy
+
 
 TODAY = datetime.date.today().strftime('%Y/%m/%d')
 TODAY_URL = datetime.date.today().strftime('%Y-%m-%d')
@@ -20,10 +20,9 @@ class EttodaySpider(scrapy.Spider):
     def start_requests(self):
         day = datetime.timedelta(days=1)
         NEWS_DATE_BEGIN = datetime.date(OLDEST_DATA_YEAR, 1, 1)
-        TODAY = datetime.date.today()
         current_time = NEWS_DATE_BEGIN
-        
-        while current_time <= TODAY:
+
+        while current_time <= datetime.date.today():
             date_str = current_time.strftime('%Y-%m-%d')
             url = 'http://www.ettoday.net/news/news-list-' + date_str + '-0.htm'
             meta = {'iter_time': 0, 'date_str':current_time.strftime('%Y/%m/%d')}
@@ -34,8 +33,8 @@ class EttodaySpider(scrapy.Spider):
         has_next_page = True
         response.meta['iter_time'] += 1
         current_date_str = response.meta['date_str']
-        isFirstIter = response.meta['iter_time'] == 1
-        prefix = '.part_list_2' if isFirstIter else ''
+        is_first_iter = response.meta['iter_time'] == 1
+        prefix = '.part_list_2' if is_first_iter else ''
         for news_item in response.css(prefix+' h3'):
             url = news_item.css('a::attr(href)').extract_first()
             if ROOT_URL not in url:
@@ -49,7 +48,7 @@ class EttodaySpider(scrapy.Spider):
 
             response.meta['category'] = category
             yield scrapy.Request(url, callback=self.parse_tag_of_news, meta=response.meta)
-        if(has_next_page):
+        if has_next_page:
             tFile = datetime.date.today().strftime('%Y%m%d') + '.xml'
             yield scrapy.FormRequest(url="http://www.ettoday.net/show_roll.php",
                                      callback=self.parse_news_list,
@@ -59,7 +58,7 @@ class EttodaySpider(scrapy.Spider):
                                                'tFile': tFile,
                                                'tOt': '0',
                                                'tSi': '100'
-                                               })
+                                              })
 
         # get scroll news list
         # yield scrapy.Request(url, callback=self.parse_news_list)
