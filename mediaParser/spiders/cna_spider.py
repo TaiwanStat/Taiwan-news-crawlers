@@ -49,7 +49,7 @@ class EbcSpider(scrapy.Spider):
             'website': "中央通訊社",
             'url': response.url,
             'title': title,
-            'date': date,
+            'date': date[:10].replace('/','-'),
             'content': content,
             'category': category
         }
