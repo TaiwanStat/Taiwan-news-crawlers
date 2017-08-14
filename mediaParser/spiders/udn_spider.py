@@ -33,7 +33,7 @@ class UdnSpider(scrapy.Spider):
 
     def parse_news(self, response):
         title = response.css('h1::text').extract_first()
-        date_of_news = response.css('.story_bady_info_author::text').extract_first()
+        date_of_news = response.css('.story_bady_info_author span::text').extract_first()[:10]
 
         content = ""
         for p in response.css('p'):
