@@ -89,7 +89,6 @@ class LibertySpider(scrapy.Spider):
         else:
             content = get_news_content(response, '#newstext h4::text',
                                        '.text p')
-        print('debug: '+'\''+category+'\'')
         yield {
             'website': "自由時報",
             'url': response.url,
