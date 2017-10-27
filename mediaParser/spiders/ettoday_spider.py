@@ -8,9 +8,11 @@ import time
 import scrapy
 
 
-TODAY = time.strftime('%Y/%m/%d')
-TODAY_URL = time.strftime('%Y-%m-%d')
-ROOT_URL = 'http://www.ettoday.net'
+# TODAY = time.strftime('%Y/%m/%d')
+# TODAY_URL = time.strftime('%Y-%m-%d')
+TODAY = '2017/10/26'
+TODAY_URL = '2017-10-26'
+ROOT_URL = 'https://www.ettoday.net'
 
 
 class EttodaySpider(scrapy.Spider):
@@ -18,7 +20,7 @@ class EttodaySpider(scrapy.Spider):
 
     def start_requests(self):
         urls = [
-            'http://www.ettoday.net/news/news-list-' + TODAY_URL + '-0.htm'
+            'https://www.ettoday.net/news/news-list-' + TODAY_URL + '-0.htm'
         ]
         for url in urls:
             meta = {'iter_time': 0}
@@ -43,7 +45,7 @@ class EttodaySpider(scrapy.Spider):
             yield scrapy.Request(url, callback=self.parse_news, meta=response.meta)
         if has_next_page:
             tFile = time.strftime('%Y%m%d') + '.xml'
-            yield scrapy.FormRequest(url="http://www.ettoday.net/show_roll.php",
+            yield scrapy.FormRequest(url="https://www.ettoday.net/show_roll.php",
                                      callback=self.parse_news_list,
                                      meta=response.meta,
                                      formdata={'offset': str(response.meta['iter_time']),
