@@ -8,10 +8,8 @@ import time
 import scrapy
 
 
-# TODAY = time.strftime('%Y/%m/%d')
-# TODAY_URL = time.strftime('%Y-%m-%d')
-TODAY = '2017/10/26'
-TODAY_URL = '2017-10-26'
+TODAY = time.strftime('%Y/%m/%d')
+TODAY_URL = time.strftime('%Y-%m-%d')
 ROOT_URL = 'https://www.ettoday.net'
 
 
