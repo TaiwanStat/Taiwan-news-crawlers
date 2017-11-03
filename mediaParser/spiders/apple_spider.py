@@ -15,7 +15,7 @@ import scrapy
 class AppleSpider(scrapy.Spider):
     name = "apple"
     start_urls = [
-        'http://www.appledaily.com.tw/appledaily/todayapple',  # 蘋果每日新聞總覽
+        'https://tw.appledaily.com/daily',  # 蘋果每日新聞總覽
     ]
 
     def parse(self, response):
@@ -31,14 +31,8 @@ class AppleSpider(scrapy.Spider):
                 for news in part.css('ul.fillup li'):
                     if 'eat-travel' in news.css("a::attr(href)").extract_first():
                         continue
-                    elif 'ent.appledaily' in news.css("a::attr(href)").extract_first():
-                        # Get redirected url
+                    elif 'entertainment.appledaily' in news.css("a::attr(href)").extract_first():
                         url = news.css("a::attr(href)").extract_first()
-                        url = w3lib.url.canonicalize_url(url)
-                        url = urllib.request.urlopen(url, None, 1).geturl()
-                        postfix = re.search(r'entertainment\/(\d*\/\d*\/)',
-                                            url).group(1)
-                        url = headline_url + postfix
                     elif 'http' in news.css("a::attr(href)").extract_first():
                         url = news.css("a::attr(href)").extract_first()
                     else:
@@ -50,20 +44,27 @@ class AppleSpider(scrapy.Spider):
     def parse_news(self, response):
         date = time.strftime('%Y-%m-%d')
         title = ""
-        t_h1 = response.css('h1#h1::text')
+        title_sel_prefix = 'hgroup'
+        p_sel_prefix = '.ndArticle_margin'
+        
+        if 'home' in response.url:
+            title_sel_prefix = '.ncbox_cont'
+            p_sel_prefix = '.articulum'
+
+        t_h1 = response.css(title_sel_prefix + '>h1::text')
         if t_h1:
             title += t_h1.extract_first()
-        t_h2 = response.css('h2#h2::text')
+        t_h2 = response.css(title_sel_prefix + '>h2::text')
         if t_h2:
             title += t_h2.extract_first()
 
-        h2 = response.css("div.articulum h2::text").extract()
+        h2 = response.css(title_sel_prefix + '>h2::text').extract()
         h2_num = len(h2)
         content = ""
         counter = 0
-        for p in response.css("div.articulum p"):
-            if p.css("p::text"):
-                content += ' '.join(p.css("p::text").extract())
+        for p in response.css(p_sel_prefix + '>p'):
+            if p.css('p::text'):
+                content += ' '.join(p.css('p::text').extract())
             if counter < h2_num:
                 content += " " + h2[counter]
                 counter += 1
