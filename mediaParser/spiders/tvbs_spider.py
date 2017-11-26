@@ -18,6 +18,7 @@ class TvbsSpider(scrapy.Spider):
     def parse(self, response):
         for news in response.css('.realtime_news_content_titel'):
             category = news.css('p::text').extract_first()
+            meta = {'category': category}
             url = news.css('div a::attr(href)').extract_first()
             url = response.urljoin(url)
             yield scrapy.Request(url, callback=self.parse_news)
@@ -37,9 +38,7 @@ class TvbsSpider(scrapy.Spider):
         date_of_news = response.css('.newsdetail-time1 p::text').extract_first()
         content = response.css('.newsdetail-content').extract_first()
         content = content[content.index('>\n\t\t')+8:content.index('<strong>')-8]
-
-        # category_links = response.css('div div div.only_web a')
-        # category = category_links[1].css('::text').extract_first()
+        content = content.replace('<br>','')
 
         yield {
             'website': "TVBS",
@@ -47,5 +46,5 @@ class TvbsSpider(scrapy.Spider):
             'title': title,
             'date': date_of_news,
             'content': content,
-            'category': category
+            'category': response.meta['category']
         }
