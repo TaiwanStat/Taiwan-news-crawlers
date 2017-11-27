@@ -25,13 +25,13 @@ class TvbsSpider(scrapy.Spider):
 
         # Auto-parse next page
         total_pages = response.css('.realtime_news_underbtn li:last-child::text').extract_first()
-        total_pages = int(total_pages[1:-1])  # ĺąxxé 
+        total_pages_num = int(total_pages[1:-1])
         url_arr = response.url.split('/')
-        current_page = int(url_arr[-1])
+        current_page_index = int(url_arr[-1])
 
-        if current_page < total_pages:
-            next_page = '/'.join(url_arr[:-1]) + '/' + str(current_page+1)
-            yield scrapy.Request(next_page, callback=self.parse)
+        if current_page_index < total_pages_num:
+            next_page_url = '/'.join(url_arr[:-1]) + '/' + str(current_page+1)
+            yield scrapy.Request(next_page_url, callback=self.parse)
 
     def parse_news(self, response):
         title = response.css('.newsdetail-h2 p strong::text').extract_first()
