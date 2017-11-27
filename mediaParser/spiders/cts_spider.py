@@ -22,12 +22,14 @@ class CtsSpider(scrapy.Spider):
         # Auto-parse next page
         pages_info = response.css('.page-desc::text').extract_first() # 第 XX 頁/共 XX 頁
         total_pages = pages_info.split('/')[1] #共 XX 頁
-        total_pages = total_pages[2:-2] 
+        total_pages = int(total_pages[2:-2])
         url_arr = response.url.split('/')
-        current_page_info = int(url_arr[-1])
+        current_page_info = url_arr[-1]
         current_page = current_page_info[5:-5]
         if current_page is '':
             current_page = 1
+        else :
+            current_page = int(current_page)
 
         if current_page < total_pages:
             next_page = '/'.join(url_arr[:-1]) + '/index' + str(current_page+1) + '.html'
@@ -38,12 +40,8 @@ class CtsSpider(scrapy.Spider):
         date_of_news = response.css('.timebar::text').extract_first().strip(' \t\n\r')
         date_of_news = date_of_news[:16]
         category = response.css('.active a::text').extract()[-1]
-
-        content = ""
-        for p in response.css('.newscontents'):
-            p_text = p.css('p::text')
-            if p_text:
-                content += ' '.join(p_text.extract_first())
+        content = response.css('.newscontents p::text').extract()
+        content = ''.join(content)
 
         yield {
             'website': "華視",
