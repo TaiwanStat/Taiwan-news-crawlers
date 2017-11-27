@@ -21,11 +21,11 @@ class TvbsSpider(scrapy.Spider):
             meta = {'category': category}
             url = news.css('div a::attr(href)').extract_first()
             url = response.urljoin(url)
-            yield scrapy.Request(url, callback=self.parse_news)
+            yield scrapy.Request(url, callback=self.parse_news, meta=meta)
 
         # Auto-parse next page
         total_pages = response.css('.realtime_news_underbtn li:last-child::text').extract_first()
-        total_pages = int(total_pages[1:-1])  # 共xx頁
+        total_pages = int(total_pages[1:-1])  # ĺąxxé 
         url_arr = response.url.split('/')
         current_page = int(url_arr[-1])
 
