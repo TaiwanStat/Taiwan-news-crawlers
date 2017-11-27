@@ -35,7 +35,7 @@ class TvbsSpider(scrapy.Spider):
 
     def parse_news(self, response):
         title = response.css('.newsdetail-h2 p strong::text').extract_first()
-        date_of_news = response.css('.newsdetail-time1 p::text').extract_first()
+        date_of_news = response.css('.newsdetail-time1 p::text').extract_first()[:10]
         content = response.css('.newsdetail-content').extract_first()
         content = content[content.index('>\n\t\t')+8:content.index('<strong>')-8]
         content = content.replace('<br>','')
