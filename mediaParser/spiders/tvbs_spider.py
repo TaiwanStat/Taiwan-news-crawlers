@@ -6,6 +6,7 @@ Usage: scrapy crawl tvbs -o <filename.json>
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from datetime import date, timedelta
+
 import scrapy
 
 YESTERDAY = (date.today() - timedelta(1)).strftime('%Y/%m/%d')
@@ -36,9 +37,17 @@ class TvbsSpider(scrapy.Spider):
     def parse_news(self, response):
         title = response.css('.newsdetail-h2 p strong::text').extract_first()
         date_of_news = response.css('.newsdetail-time1 p::text').extract_first()[:10]
-        content = response.css('.newsdetail-content').extract_first()
-        content = content[content.index('>\n\t\t')+8:content.index('<strong>')-8]
-        content = content.replace('<br>','')
+        raw_content = response.css('.newsdetail-content').extract_first()
+
+        content_prefix = '<!-- 新聞主內容 -->'
+        content_suffix = '<strong>'
+
+        content = raw_content.split(content_prefix)[1]
+        content = content.split(content_suffix)[0]
+        content = content.replace('<br>', ' ')
+        content = content.replace('\n', ' ')
+        content = content.replace('\t', ' ')
+        content = content.strip()
 
         yield {
             'website': "TVBS",
