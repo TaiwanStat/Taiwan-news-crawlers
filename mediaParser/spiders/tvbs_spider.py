@@ -50,7 +50,7 @@ class TvbsSpider(scrapy.Spider):
         content = content.strip()
 
         yield {
-            'website': "TVBS",
+            'website': "tvbs",
             'url': response.url,
             'title': title,
             'date': date_of_news,
