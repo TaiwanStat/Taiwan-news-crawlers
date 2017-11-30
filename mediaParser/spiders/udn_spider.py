@@ -5,31 +5,45 @@ Usage: scrapy crawl udn -o <filename.json>
 """
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from datetime import date, timedelta
+from datetime import datetime, timedelta
 import scrapy
 
-YESTERDAY = (date.today() - timedelta(1)).strftime('%Y/%m/%d')
-
+TODAY_STR = datetime.now().strftime('%m-%d')
 
 class UdnSpider(scrapy.Spider):
     name = "udn"
-    start_urls = ['http://udn.com/news/archive/0/0/{}/1'.format(YESTERDAY)]
+
+    def start_requests(self):
+        urls = ['https://udn.com/news/breaknews/1']
+        for url in urls:
+            meta = {'iter_time': 1}
+            yield scrapy.Request(url, callback=self.parse, meta=meta)
 
     def parse(self, response):
-        for news in response.css('td a'):
+        has_next_page = True
+        isFirstIter = response.meta['iter_time'] == 1
+        response.meta['iter_time'] += 1
+        elSelector = '#breaknews_body dt' if isFirstIter else 'dt'
+        target = response.css(elSelector)
+        if not target:
+            has_next_page = False
+        for news in target:
             url = news.css('a::attr(href)').extract_first()
             url = response.urljoin(url)
+            date_time = news.css('.info .dt::text').extract_first()
+
+            if TODAY_STR not in date_time:
+                has_next_page = False
+                break
+
             yield scrapy.Request(url, callback=self.parse_news)
 
-        # Auto-parse next page
-        total_pages = response.css(".pagelink .total::text").extract_first()
-        total_pages = int(total_pages[2:-2])  # 共 x 頁
-        url_arr = response.url.split('/')
-        current_page = int(url_arr[-1])
 
-        if current_page < total_pages:
-            next_page = '/'.join(url_arr[:-1]) + '/' + str(current_page+1)
-            yield scrapy.Request(next_page, callback=self.parse)
+        if has_next_page:
+            iter_time = response.meta['iter_time']
+            yield scrapy.FormRequest(url='https://udn.com/news/get_breaks_article/%d/1/0' % iter_time,
+                                        callback=self.parse, meta=response.meta)
+
 
     def parse_news(self, response):
         title = response.css('h1::text').extract_first()
