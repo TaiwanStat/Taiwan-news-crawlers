@@ -15,6 +15,7 @@ class SetnSpider(scrapy.Spider):
     name = "setn"
     start_urls = ['http://www.setn.com/ViewAll.aspx?date={}&p=1'.format(YESTERDAY)]
 
+    last_page_flag = 0
     def parse(self, response):
         for news in response.css('.box ul li'):
             category = news.css('.tab_list_type span::text').extract_first()
@@ -24,22 +25,29 @@ class SetnSpider(scrapy.Spider):
             yield scrapy.Request(url, callback=self.parse_news, meta=meta)
 
         # Auto-parse next page
-        # total_pages = response.css('.realtime_news_underbtn li:last-child::text').extract_first()
-        # total_pages_num = int(total_pages[1:-1])
-        # url_arr = response.url.split('/')
-        # current_page_index = int(url_arr[-1])
+        last_two_pages = response.css('.pager a::attr(href)').extract()[-2:]
+        page1 = last_two_pages[0].split('&')[1].split('=')[1]
+        page2 = last_two_pages[1].split('&')[1].split('=')[1]
+        if page1 == page2 :
+            last_page_flag = last_page_flag + 1
 
-        # if current_page_index < total_pages_num:
-        #     next_page_url = '/'.join(url_arr[:-1]) + \
-        #         '/' + str(current_page_index + 1)
-        #     yield scrapy.Request(next_page_url, callback=self.parse)
+        if last_page_flag < 2 :
+            url_arr = response.url.split('&p=')
+            current_page_index = int(url_arr[1])
+            next_page_url = '&p='.join(url_arr[:-1]) + '&p=' + str(current_pagepage+1)
+            yield scrapy.Request(next_page_url, callback=self.parse)
 
     def parse_news(self, response):
         title = response.css('.title h1::text').extract_first()
-        date_of_news = response.css('.date::text').extract_first()[:10]
-        content = response.css('#Content1 p::text').extract()
+        if response.url.split('/')[3] == 'E' :
+            date_of_news = response.css('.time::text').extract_first()[:10]
+            content = response.css('.Content2 p::text').extract()
+        else :
+            date_of_news = response.css('.date::text').extract_first()[:10]
+            content = response.css('#Content1 p::text').extract()
+        
         content = ''.join(content)
-
+        
         yield {
             'website': "三立新聞",
             'url': response.url,
