@@ -15,6 +15,7 @@ class SetnSpider(scrapy.Spider):
     name = "setn"
     start_urls = ['http://www.setn.com/ViewAll.aspx?date={}&p=1'.format(YESTERDAY)]
 
+    global last_page_flag
     last_page_flag = 0
     def parse(self, response):
         for news in response.css('.box ul li'):
@@ -26,15 +27,15 @@ class SetnSpider(scrapy.Spider):
 
         # Auto-parse next page
         last_two_pages = response.css('.pager a::attr(href)').extract()[-2:]
-        page1 = last_two_pages[0].split('&')[1].split('=')[1]
-        page2 = last_two_pages[1].split('&')[1].split('=')[1]
+        page1 = last_two_pages[0].split('&p=')[1]
+        page2 = last_two_pages[1].split('&p=')[1]
         if page1 == page2 :
             last_page_flag = last_page_flag + 1
 
         if last_page_flag < 2 :
             url_arr = response.url.split('&p=')
-            current_page_index = int(url_arr[1])
-            next_page_url = '&p='.join(url_arr[:-1]) + '&p=' + str(current_pagepage+1)
+            current_page = int(url_arr[1])
+            next_page_url = '&p='.join(url_arr[:-1]) + '&p=' + str(current_page+1)
             yield scrapy.Request(next_page_url, callback=self.parse)
 
     def parse_news(self, response):
