@@ -17,6 +17,7 @@ class SetnSpider(scrapy.Spider):
 
     global last_page_flag
     last_page_flag = 0
+
     def parse(self, response):
         global last_page_flag
 
@@ -31,6 +32,7 @@ class SetnSpider(scrapy.Spider):
         last_two_pages = response.css('.pager a::attr(href)').extract()[-2:]
         page1 = last_two_pages[0].split('&p=')[1]
         page2 = last_two_pages[1].split('&p=')[1]
+
         if page1 == page2 :
             last_page_flag = last_page_flag + 1
 
@@ -42,6 +44,8 @@ class SetnSpider(scrapy.Spider):
 
     def parse_news(self, response):
         title = response.css('.title h1::text').extract_first()
+        content = ''
+        date_of_news = ''
         if response.url.split('/')[3] == 'E' :
             date_of_news = response.css('.time::text').extract_first()[:10]
             content = response.css('.Content2 p::text').extract()
