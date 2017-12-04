@@ -18,6 +18,8 @@ class SetnSpider(scrapy.Spider):
     global last_page_flag
     last_page_flag = 0
     def parse(self, response):
+        global last_page_flag
+
         for news in response.css('.box ul li'):
             category = news.css('.tab_list_type span::text').extract_first()
             meta = {'category': category}
