@@ -9,11 +9,35 @@ from datetime import datetime
 import scrapy
 
 ROOT_URL = 'http://www.chinatimes.com'
-PAGE_URL = 'http://www.chinatimes.com/newspapers/2601'
 
 class ChinaSpider(scrapy.Spider):
     name = "china"
-    start_urls = ['http://www.chinatimes.com/newspapers/2601']
+
+    def start_requests(self):
+        start_info = [
+            {
+                'name': '中時',
+                'suffix': '/newspapers/2601'
+            },
+            {
+                'name': '工商時報',
+                'suffix': '/newspapers/2602'
+            },
+            {
+                'name': '旺報',
+                'suffix': '/newspapers/2603'
+            },
+            {
+                'name': '即時新聞',
+                'suffix': '/realtimenews'
+            }
+        ]
+        for i in start_info:
+            meta = {
+                'suffix': i['suffix'],
+                'name': i['name']
+            }
+            yield scrapy.Request(ROOT_URL + i['suffix'], callback=self.parse, meta=meta)
 
     def parse(self, response):
         news_in_page = response.css('.listRight li h2 a')
@@ -25,13 +49,15 @@ class ChinaSpider(scrapy.Spider):
             if ROOT_URL not in url:
                 url = ROOT_URL + url
             url = response.urljoin(url)
-            yield scrapy.Request(url, callback=self.parse_news)
+            yield scrapy.Request(url, callback=self.parse_news, meta=response.meta)
         if 'next_page' in response.meta:
-            meta = {'next_page': response.meta['next_page'] + 1}
+            response.meta['next_page'] = response.meta['next_page'] + 1
         else:
-            meta = {'next_page': 2}
-        next_url = PAGE_URL + '?page=' + str(meta['next_page'])
-        yield scrapy.Request(next_url, callback=self.parse, meta=meta)
+            response.meta['next_page'] = 2
+        next_url = ROOT_URL + \
+            response.meta['suffix'] + '?page=' + \
+            str(response.meta['next_page'])
+        yield scrapy.Request(next_url, callback=self.parse, meta=response.meta)
 
     def parse_news(self, response):
         title = response.css('h1::text').extract_first()
@@ -44,12 +70,12 @@ class ChinaSpider(scrapy.Spider):
                 content += ' '.join(p_text.extract())
 
         category = response.css('.page_index span::text').extract()[-1].strip()
-
         yield {
             'website': "中國時報",
             'url': response.url,
             'title': title,
             'date': date_of_news,
             'content': content,
-            'category': category
+            'category': category,
+            'note': response.meta['name']
         }
