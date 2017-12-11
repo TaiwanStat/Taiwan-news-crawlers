@@ -1,5 +1,5 @@
 """
-華視
+CTS
 the crawl deal with cts's news
 Usage: scrapy crawl cts -o <filename.json>
 """
