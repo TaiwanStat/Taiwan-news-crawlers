@@ -1,7 +1,7 @@
 """
 三立新聞
 the crawl deal with setn's news
-Usage: scrapy crawl setn -o <filename.json>
+Usage: scrapy crawl setn -o <filename.json> -s DOWNLOAD_DELAY=0.13
 """
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
