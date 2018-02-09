@@ -26,8 +26,8 @@ class EttodaySpider(scrapy.Spider):
     def parse_news_list(self, response):
         has_next_page = True
         response.meta['iter_time'] += 1
-        isFirstIter = response.meta['iter_time'] == 1
-        prefix = '.part_list_2' if isFirstIter else ''
+        is＿first_iter = response.meta['iter_time'] == 1
+        prefix = '.part_list_2' if is＿first_iter else ''
         for news_item in response.css(prefix + ' h3'):
             url = news_item.css('a::attr(href)').extract_first()
             url = ROOT_URL + url
