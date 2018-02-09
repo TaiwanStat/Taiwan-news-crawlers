@@ -6,10 +6,11 @@ Usage: scrapy crawl apple -o <filename.json>
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import time
 import re
-import urllib.request
+import time
+
 import w3lib.url
+
 import scrapy
 
 
@@ -20,8 +21,6 @@ class AppleSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        headline_url = 'http://ent.appledaily.com.tw/section/article/headline/'
-
         section = response.css('section.nclnbx.slvl.clearmen, article.nclns')
         for part in section:
             if part.css('header.schh h1::text'):
