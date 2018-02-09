@@ -5,7 +5,8 @@ Usage: scrapy crawl udn -o <filename.json>
 """
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from datetime import datetime, timedelta
+from datetime import datetime
+from datetime import timedelta
 import scrapy
 
 TODAY_STR = datetime.now().strftime('%m-%d')
@@ -15,17 +16,16 @@ class UdnSpider(scrapy.Spider):
     name = "udn"
 
     def start_requests(self):
-        urls = ['https://udn.com/news/breaknews/1']
-        for url in urls:
-            meta = {'iter_time': 1}
-            yield scrapy.Request(url, callback=self.parse, meta=meta)
+        url = 'https://udn.com/news/breaknews/1'
+        meta = {'iter_time': 1}
+        yield scrapy.Request(url, callback=self.parse, meta=meta)
 
     def parse(self, response):
         has_next_page = True
-        isFirstIter = response.meta['iter_time'] == 1
+        is_first_iter = response.meta['iter_time'] == 1
         response.meta['iter_time'] += 1
-        elSelector = '#breaknews_body dt' if isFirstIter else 'dt'
-        target = response.css(elSelector)
+        el_selector = '#breaknews_body dt' if is_first_iter else 'dt'
+        target = response.css(el_selector)
         if not target:
             has_next_page = False
         for news in target:
