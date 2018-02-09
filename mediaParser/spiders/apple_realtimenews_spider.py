@@ -6,8 +6,10 @@ Usage: scrapy crawl appleRealtime -o <filename.json>
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from datetime import datetime, date
 import re
+from datetime import datetime
+from datetime import date
+
 import scrapy
 
 TODAY = date.today()
