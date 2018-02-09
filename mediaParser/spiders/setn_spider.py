@@ -6,7 +6,8 @@ Usage: scrapy crawl setn -o <filename.json> -s DOWNLOAD_DELAY=0.1
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import re
-from datetime import date, timedelta
+from datetime import date
+from datetime import timedelta
 import scrapy
 
 YESTERDAY = (date.today() - timedelta(1)).strftime('%m/%d/%Y')
@@ -14,15 +15,15 @@ YESTERDAY = (date.today() - timedelta(1)).strftime('%m/%d/%Y')
 
 class SetnSpider(scrapy.Spider):
     name = "setn"
-    start_urls = [
-        'http://www.setn.com/ViewAll.aspx?date={}&p=1'.format(YESTERDAY)
-    ]
 
-    global last_page_flag
-    last_page_flag = 0
+    def __init__(self, category=None, *args, **kwargs):
+        super(SetnSpider, self).__init__(*args, **kwargs)
+        self.start_urls = [
+            'http://www.setn.com/ViewAll.aspx?date={}&p=1'.format(YESTERDAY)
+        ]
+        self.last_page_flag = 0
 
     def parse(self, response):
-        global last_page_flag
 
         for news in response.css('.box ul li'):
             category = news.css('.tab_list_type span::text').extract_first()
@@ -36,9 +37,9 @@ class SetnSpider(scrapy.Spider):
         page2 = last_two_pages[1].split('&p=')[1]
 
         if page1 == page2:
-            last_page_flag = last_page_flag + 1
+            self.last_page_flag = self.last_page_flag + 1
 
-        if last_page_flag < 2:
+        if self.last_page_flag < 2:
             url_arr = response.url.split('&p=')
             current_page = int(url_arr[1])
             next_page_url = '&p='.join(
