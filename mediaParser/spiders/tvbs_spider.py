@@ -6,7 +6,8 @@ Usage: scrapy crawl tvbs -o <filename.json>
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import re
-from datetime import date, timedelta
+from datetime import date
+from datetime import timedelta
 
 import scrapy
 
