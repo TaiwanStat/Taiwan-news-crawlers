@@ -1,11 +1,12 @@
 """
-CTS
+華視
 the crawl deal with cts's news
 Usage: scrapy crawl cts -o <filename.json>
 """
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from datetime import date, timedelta
+from datetime import date
+from datetime import timedelta
 import scrapy
 
 YESTERDAY = (date.today() - timedelta(1)).strftime('%Y/%m/%d')
@@ -49,7 +50,7 @@ class CtsSpider(scrapy.Spider):
         content = ' '.join(content)
 
         yield {
-            'website': "蝯視",
+            'website': "華視",
             'url': response.url,
             'title': title,
             'date': date_of_news,
