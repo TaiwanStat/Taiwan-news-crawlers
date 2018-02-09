@@ -1,4 +1,5 @@
 """
+自由時報tag
 the crawl deal with tags of liberty's news, which could make the dictionary of jieba
 Usage: scrapy crawl liberty_tag -o <filename.json>
 """
@@ -10,6 +11,8 @@ import scrapy
 
 ROOT_URL = 'http://news.ltn.com.tw'
 OLDEST_DATA_YEAR = 2015
+NEWS_DATE_BEGIN = datetime.date(OLDEST_DATA_YEAR, 1, 1)
+TODAY = datetime.date.today()
 CATEGORY_DIC = {
     'focus': '焦點',
     'politics': '政治',
@@ -46,8 +49,6 @@ class LibertySpider(scrapy.Spider):
         ]
 
         day = datetime.timedelta(days=1)
-        NEWS_DATE_BEGIN = datetime.date(OLDEST_DATA_YEAR, 1, 1)
-        TODAY = datetime.date.today()
         current_time = NEWS_DATE_BEGIN
 
         while current_time <= TODAY:
