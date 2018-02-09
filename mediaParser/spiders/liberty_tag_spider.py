@@ -8,7 +8,6 @@ import re
 import datetime
 import scrapy
 
-
 ROOT_URL = 'http://news.ltn.com.tw'
 OLDEST_DATA_YEAR = 2015
 CATEGORY_DIC = {
@@ -64,9 +63,14 @@ class LibertySpider(scrapy.Spider):
             abs_url = response.urljoin(relative_url)
             yield scrapy.Request(abs_url, callback=self.parse_tag_of_news)
 
-        page_list = [int(p) for p in response.css('.pagination a::text').extract() if p.isdigit()]
-        current_page_extract = response.css('.pagination a.active::text').extract_first()
-        current_page = int(current_page_extract) if current_page_extract is True else 1
+        page_list = [
+            int(p) for p in response.css('.pagination a::text').extract()
+            if p.isdigit()
+        ]
+        current_page_extract = response.css(
+            '.pagination a.active::text').extract_first()
+        current_page = int(
+            current_page_extract) if current_page_extract is True else 1
         if (not page_list) or (current_page >= max(page_list)):
             return
 
@@ -79,9 +83,8 @@ class LibertySpider(scrapy.Spider):
             yield scrapy.Request(abs_url, callback=self.parse_news_list)
 
     def parse_tag_of_news(self, response):
-        tag_string = response.css('head meta[name=keywords]::attr(content)').extract_first()
+        tag_string = response.css(
+            'head meta[name=keywords]::attr(content)').extract_first()
         tags = tag_string.split(',')
 
-        yield {
-            'tag': tags
-        }
+        yield {'tag': tags}

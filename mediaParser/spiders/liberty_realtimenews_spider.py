@@ -9,7 +9,6 @@ import re
 from datetime import datetime, date
 import scrapy
 
-
 ROOT_URL = 'http://news.ltn.com.tw/'
 Realtime_NEWS_URL = 'http://news.ltn.com.tw/list/breakingnews/all/'
 today = date.today()
@@ -35,15 +34,13 @@ CATEGORY_DIC = {
 
 class LibertySpider(scrapy.Spider):
     name = "libertyRealtime"
-    start_urls = [
-        'http://news.ltn.com.tw/list/breakingnews/all'
-    ]
+    start_urls = ['http://news.ltn.com.tw/list/breakingnews/all']
 
     def parse(self, response):
         regex = r'\/all\/(\d+)'
         current_index = re.search(regex, response.url)
         if current_index:
-            next_index = int(current_index.group(1))+1
+            next_index = int(current_index.group(1)) + 1
         else:
             next_index = 2
         date_of_news = response.css('a.tit span::text').extract()
@@ -69,20 +66,17 @@ class LibertySpider(scrapy.Spider):
             title = response.css('h1::text').extract_first()
 
         if category == 'opinion':
-            content = get_news_content(response,
-                                       '.cont h4::text', '.cont p')
+            content = get_news_content(response, '.cont h4::text', '.cont p')
         elif category == 'sports':
-            content = get_news_content(response,
-                                       '.news_p h4::text', '.news_p p')
+            content = get_news_content(response, '.news_p h4::text',
+                                       '.news_p p')
         elif category == 'entertainment':
             content = get_news_content(response, '.news_content h4::text',
                                        '.news_content p')
         elif category == 'car':
-            content = get_news_content(response, '.con h4::text',
-                                       '.con p')
+            content = get_news_content(response, '.con h4::text', '.con p')
         elif category == '3c':
-            content = get_news_content(response, '.cont h4::text',
-                                       '.cont p')
+            content = get_news_content(response, '.cont h4::text', '.cont p')
         elif category == 'istyle':
             content = get_news_content(response, '.boxTitle h4::text',
                                        '.boxTitle p')
@@ -100,7 +94,8 @@ class LibertySpider(scrapy.Spider):
 
 
 def get_news_category(response):
-    searched_category = re.search(r'\/news\/([a-z]*)\/breakingnews\/', response.url)
+    searched_category = re.search(r'\/news\/([a-z]*)\/breakingnews\/',
+                                  response.url)
 
     if searched_category and searched_category.group(1) != 'paper':
         return searched_category.group(1)

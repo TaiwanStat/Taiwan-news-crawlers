@@ -10,6 +10,7 @@ import scrapy
 
 TODAY_STR = datetime.now().strftime('%m-%d')
 
+
 class UdnSpider(scrapy.Spider):
     name = "udn"
 
@@ -38,16 +39,18 @@ class UdnSpider(scrapy.Spider):
 
             yield scrapy.Request(url, callback=self.parse_news)
 
-
         if has_next_page:
             iter_time = response.meta['iter_time']
-            yield scrapy.FormRequest(url='https://udn.com/news/get_breaks_article/%d/1/0' % iter_time,
-                                        callback=self.parse, meta=response.meta)
-
+            yield scrapy.FormRequest(
+                url='https://udn.com/news/get_breaks_article/%d/1/0' %
+                iter_time,
+                callback=self.parse,
+                meta=response.meta)
 
     def parse_news(self, response):
         title = response.css('h1::text').extract_first()
-        date_of_news = response.css('.story_bady_info_author span::text').extract_first()[:10]
+        date_of_news = response.css(
+            '.story_bady_info_author span::text').extract_first()[:10]
 
         content = ""
         for p in response.css('p'):

@@ -10,9 +10,12 @@ import scrapy
 
 YESTERDAY = (date.today() - timedelta(1)).strftime('%Y/%m/%d')
 
+
 class CtsSpider(scrapy.Spider):
     name = "cts"
-    start_urls = ['http://news.cts.com.tw/daylist/{}/index.html'.format(YESTERDAY)]
+    start_urls = [
+        'http://news.cts.com.tw/daylist/{}/index.html'.format(YESTERDAY)
+    ]
 
     def parse(self, response):
         for news in response.css('.news_right'):
@@ -28,16 +31,19 @@ class CtsSpider(scrapy.Spider):
         current_page_index = url_suffix[5:-5]
         if current_page_index is '':
             current_page_index = 1
-        else :
+        else:
             current_page_index = int(current_page_index)
 
         if current_page_index < total_pages:
-            next_page = '/'.join(url_arr[:-1]) + '/index' + str(current_page_index+1) + '.html'
+            next_page = '/'.join(url_arr[:-1]) + '/index' + str(
+                current_page_index + 1) + '.html'
             yield scrapy.Request(next_page, callback=self.parse)
 
     def parse_news(self, response):
-        title = response.css('.newsbigtitle::text').extract_first().strip(' \t\n\r')
-        date_of_news = response.css('.timebar::text').extract_first().strip(' \t\n\r')
+        title = response.css('.newsbigtitle::text').extract_first().strip(
+            ' \t\n\r')
+        date_of_news = response.css('.timebar::text').extract_first().strip(
+            ' \t\n\r')
         date_of_news = date_of_news[:10]
         category = response.css('.active a::text').extract()[-1]
         content = response.css('.newscontents p::text').extract()

@@ -1,7 +1,7 @@
 """
 三立新聞
 the crawl deal with setn's news
-Usage: scrapy crawl setn -o <filename.json> -s DOWNLOAD_DELAY=0.13
+Usage: scrapy crawl setn -o <filename.json> -s DOWNLOAD_DELAY=0.1
 """
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
@@ -11,9 +11,12 @@ import scrapy
 
 YESTERDAY = (date.today() - timedelta(1)).strftime('%m/%d/%Y')
 
+
 class SetnSpider(scrapy.Spider):
     name = "setn"
-    start_urls = ['http://www.setn.com/ViewAll.aspx?date={}&p=1'.format(YESTERDAY)]
+    start_urls = [
+        'http://www.setn.com/ViewAll.aspx?date={}&p=1'.format(YESTERDAY)
+    ]
 
     global last_page_flag
     last_page_flag = 0
@@ -33,28 +36,29 @@ class SetnSpider(scrapy.Spider):
         page1 = last_two_pages[0].split('&p=')[1]
         page2 = last_two_pages[1].split('&p=')[1]
 
-        if page1 == page2 :
+        if page1 == page2:
             last_page_flag = last_page_flag + 1
 
-        if last_page_flag < 2 :
+        if last_page_flag < 2:
             url_arr = response.url.split('&p=')
             current_page = int(url_arr[1])
-            next_page_url = '&p='.join(url_arr[:-1]) + '&p=' + str(current_page+1)
+            next_page_url = '&p='.join(
+                url_arr[:-1]) + '&p=' + str(current_page + 1)
             yield scrapy.Request(next_page_url, callback=self.parse)
 
     def parse_news(self, response):
         title = response.css('.title h1::text').extract_first()
         content = ''
         date_of_news = ''
-        if response.url.split('/')[3] == 'E' :
+        if response.url.split('/')[3] == 'E':
             date_of_news = response.css('.time::text').extract_first()[:10]
             content = response.css('.Content2 p::text').extract()
-        else :
+        else:
             date_of_news = response.css('.date::text').extract_first()[:10]
             content = response.css('#Content1 p::text').extract()
-        
+
         content = ''.join(content)
-        
+
         yield {
             'website': "三立新聞",
             'url': response.url,

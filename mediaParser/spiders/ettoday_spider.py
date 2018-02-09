@@ -7,7 +7,6 @@ Usage: scrapy crawl ettoday -o <filename.json>
 import time
 import scrapy
 
-
 TODAY = time.strftime('%Y/%m/%d')
 TODAY_URL = time.strftime('%Y-%m-%d')
 ROOT_URL = 'https://www.ettoday.net'
@@ -29,7 +28,7 @@ class EttodaySpider(scrapy.Spider):
         response.meta['iter_time'] += 1
         isFirstIter = response.meta['iter_time'] == 1
         prefix = '.part_list_2' if isFirstIter else ''
-        for news_item in response.css(prefix+' h3'):
+        for news_item in response.css(prefix + ' h3'):
             url = news_item.css('a::attr(href)').extract_first()
             url = ROOT_URL + url
             category = news_item.css('em::text').extract_first()
@@ -40,18 +39,21 @@ class EttodaySpider(scrapy.Spider):
                 continue
 
             response.meta['category'] = category
-            yield scrapy.Request(url, callback=self.parse_news, meta=response.meta)
+            yield scrapy.Request(
+                url, callback=self.parse_news, meta=response.meta)
         if has_next_page:
             tFile = time.strftime('%Y%m%d') + '.xml'
-            yield scrapy.FormRequest(url="https://www.ettoday.net/show_roll.php",
-                                     callback=self.parse_news_list,
-                                     meta=response.meta,
-                                     formdata={'offset': str(response.meta['iter_time']),
-                                               'tPage': '3',
-                                               'tFile': tFile,
-                                               'tOt': '0',
-                                               'tSi': '100'
-                                              })
+            yield scrapy.FormRequest(
+                url="https://www.ettoday.net/show_roll.php",
+                callback=self.parse_news_list,
+                meta=response.meta,
+                formdata={
+                    'offset': str(response.meta['iter_time']),
+                    'tPage': '3',
+                    'tFile': tFile,
+                    'tOt': '0',
+                    'tSi': '100'
+                })
 
         # get scroll news list
         # yield scrapy.Request(url, callback=self.parse_news_list)

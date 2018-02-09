@@ -9,7 +9,6 @@ import time
 import re
 import scrapy
 
-
 ROOT_URL = 'http://news.ltn.com.tw'
 CATEGORY_DIC = {
     'focus': '焦點',
@@ -57,9 +56,14 @@ class LibertySpider(scrapy.Spider):
             abs_url = response.urljoin(relative_url)
             yield scrapy.Request(abs_url, callback=self.parse_news)
 
-        page_list = [int(p) for p in response.css('.pagination a::text').extract() if p.isdigit()]
-        current_page_extract = response.css('.pagination a.active::text').extract_first()
-        current_page = int(current_page_extract) if current_page_extract is True else 1
+        page_list = [
+            int(p) for p in response.css('.pagination a::text').extract()
+            if p.isdigit()
+        ]
+        current_page_extract = response.css(
+            '.pagination a.active::text').extract_first()
+        current_page = int(
+            current_page_extract) if current_page_extract is True else 1
         if (not page_list) or (current_page >= max(page_list)):
             return
 
@@ -80,17 +84,15 @@ class LibertySpider(scrapy.Spider):
             title = response.css('h1::text').extract_first()
 
         if category == 'opinion':
-            content = get_news_content(response,
-                                       '.cont h4::text', '.cont p')
+            content = get_news_content(response, '.cont h4::text', '.cont p')
         elif category == 'sports':
-            content = get_news_content(response,
-                                       '.news_p h4::text', '.news_p p')
+            content = get_news_content(response, '.news_p h4::text',
+                                       '.news_p p')
         elif category == 'entertainment':
             content = get_news_content(response, '.news_content h4::text',
                                        '.news_content p')
         else:
-            content = get_news_content(response, '.text h4::text',
-                                       '.text p')
+            content = get_news_content(response, '.text h4::text', '.text p')
 
         yield {
             'website': "自由時報",
@@ -100,6 +102,7 @@ class LibertySpider(scrapy.Spider):
             'content': content,
             'category': CATEGORY_DIC[category]
         }
+
 
 def get_news_category(response):
     searched_category = re.search(r'\/news\/([a-z]*)\/', response.url)
@@ -112,6 +115,7 @@ def get_news_category(response):
         return 'sports'
     elif 'ent' in response.url:
         return 'entertainment'
+
 
 def get_news_content(response, h4_query, p_query):
     h4 = response.css(h4_query).extract()

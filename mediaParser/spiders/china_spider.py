@@ -11,6 +11,7 @@ import scrapy
 ROOT_URL = 'http://www.chinatimes.com'
 PAGE_URL = 'http://www.chinatimes.com/newspapers/2601'
 
+
 class ChinaSpider(scrapy.Spider):
     name = "china"
     start_urls = ['http://www.chinatimes.com/newspapers/2601']

@@ -12,6 +12,7 @@ import urllib.request
 import w3lib.url
 import scrapy
 
+
 class AppleSpider(scrapy.Spider):
     name = "apple"
     start_urls = [
@@ -29,24 +30,28 @@ class AppleSpider(scrapy.Spider):
             else:
                 meta = {'category': category}
                 for news in part.css('ul.fillup li'):
-                    if 'eat-travel' in news.css("a::attr(href)").extract_first():
+                    if 'eat-travel' in news.css(
+                            "a::attr(href)").extract_first():
                         continue
-                    elif 'entertainment.appledaily' in news.css("a::attr(href)").extract_first():
+                    elif 'entertainment.appledaily' in news.css(
+                            "a::attr(href)").extract_first():
                         url = news.css("a::attr(href)").extract_first()
                     elif 'http' in news.css("a::attr(href)").extract_first():
                         url = news.css("a::attr(href)").extract_first()
                     else:
-                        url = "http://www.appledaily.com.tw{}".format(news.css("a::attr(href)").extract_first())
+                        url = "http://www.appledaily.com.tw{}".format(
+                            news.css("a::attr(href)").extract_first())
                     if url:
                         url = response.urljoin(url)
-                        yield scrapy.Request(url, callback=self.parse_news, meta=meta)
+                        yield scrapy.Request(
+                            url, callback=self.parse_news, meta=meta)
 
     def parse_news(self, response):
         date = time.strftime('%Y-%m-%d')
         title = ""
         title_sel_prefix = 'hgroup'
         p_sel_prefix = '.ndArticle_margin'
-        
+
         if 'home' in response.url:
             title_sel_prefix = '.ncbox_cont'
             p_sel_prefix = '.articulum'

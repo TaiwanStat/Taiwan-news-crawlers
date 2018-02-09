@@ -28,8 +28,10 @@ class EttodaySpider(scrapy.Spider):
             url = news_item.css('h2 a::attr(href)').extract_first()
             date_time = news_item.css('.list-news-time::text').extract_first()
             title = news_item.css('h2 a::text').extract_first()
-            content = news_item.css('.list-news-description::text').extract_first()
-            category = news_item.css('.list-news-program::text').extract_first()
+            content = news_item.css(
+                '.list-news-description::text').extract_first()
+            category = news_item.css(
+                '.list-news-program::text').extract_first()
 
             if TODAY in date_time:
                 yield {
@@ -41,11 +43,14 @@ class EttodaySpider(scrapy.Spider):
                     'category': category
                 }
 
-        yield scrapy.FormRequest(url='https://news.pts.org.tw/list/getmore.php',
-                                 callback=self.get_news,
-                                 meta=response.meta,
-                                 formdata={'page': '1'}
-                                )
+        yield scrapy.FormRequest(
+            url='https://news.pts.org.tw/list/getmore.php',
+            callback=self.get_news,
+            meta=response.meta,
+            formdata={
+                'page': '1'
+            })
+
     def get_news(self, response):
         response.meta['iter_time'] += 1
         news_items = json.loads(response.text)
@@ -60,9 +65,10 @@ class EttodaySpider(scrapy.Spider):
                     'content': n['content'],
                     'category': n['program_name']
                 }
-            yield scrapy.FormRequest(url="https://news.pts.org.tw/list/getmore.php",
-                                     callback=self.get_news,
-                                     meta=response.meta,
-                                     formdata={'page': str(
-                                         response.meta['iter_time'])}
-                                    )
+            yield scrapy.FormRequest(
+                url="https://news.pts.org.tw/list/getmore.php",
+                callback=self.get_news,
+                meta=response.meta,
+                formdata={
+                    'page': str(response.meta['iter_time'])
+                })
