@@ -68,7 +68,6 @@ class EttodaySpider(scrapy.Spider):
 
 
     def parse_tag_of_news(self, response):
-        print('here')
         tag_string = response.css(
             'head meta[name=news_keywords]::attr(content)').extract_first()
         tags = tag_string.split(',')
