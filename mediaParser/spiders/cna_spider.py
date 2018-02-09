@@ -1,4 +1,5 @@
 """
+中央社
 the crawl deal with cna's news
 Usage: scrapy crawl cna -o <filename.json>
 """
@@ -11,7 +12,7 @@ ROOT_URL = 'http://www.cna.com.tw'
 TODAY = datetime.today().date()
 
 
-class EbcSpider(scrapy.Spider):
+class CnaSpider(scrapy.Spider):
     name = "cna"
     start_urls = ['http://www.cna.com.tw/list/aall-1.aspx']
 
