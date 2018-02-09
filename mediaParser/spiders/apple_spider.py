@@ -16,7 +16,7 @@ import scrapy
 class AppleSpider(scrapy.Spider):
     name = "apple"
     start_urls = [
-        'https://tw.appledaily.com/daily',  # 蘋果每日新聞總覽
+        'https://tw.appledaily.com/daily',
     ]
 
     def parse(self, response):

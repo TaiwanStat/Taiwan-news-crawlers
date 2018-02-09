@@ -22,7 +22,6 @@ class CtsSpider(scrapy.Spider):
             url = news.css('a::attr(href)').extract_first()
             yield scrapy.Request(url, callback=self.parse_news)
 
-        # Auto-parse next page
         page_desc = response.css('.page-desc::text').extract_first()
         total_pages = page_desc.split('/')[1]
         total_pages = int(total_pages[2:-2])
@@ -50,7 +49,7 @@ class CtsSpider(scrapy.Spider):
         content = ' '.join(content)
 
         yield {
-            'website': "華視",
+            'website': "蝯視",
             'url': response.url,
             'title': title,
             'date': date_of_news,

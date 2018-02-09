@@ -20,7 +20,7 @@ class ChinaSpider(scrapy.Spider):
         news_in_page = response.css('.listRight li h2 a')
         if not news_in_page:
             return
-        # parse lists of news
+
         for news in news_in_page:
             url = news.css('a::attr(href)').extract_first()
             if ROOT_URL not in url:

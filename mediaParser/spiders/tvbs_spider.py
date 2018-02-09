@@ -28,7 +28,6 @@ class TvbsSpider(scrapy.Spider):
             url = response.urljoin(url)
             yield scrapy.Request(url, callback=self.parse_news, meta=meta)
 
-        # Auto-parse next page
         total_pages = response.css(
             '.realtime_news_underbtn li:last-child::text').extract_first()
         total_pages_num = int(total_pages[1:-1])

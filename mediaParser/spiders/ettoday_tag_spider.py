@@ -65,8 +65,6 @@ class EttodaySpider(scrapy.Spider):
                     'tSi': '100'
                 })
 
-        # get scroll news list
-        # yield scrapy.Request(url, callback=self.parse_news_list)
 
     def parse_tag_of_news(self, response):
         print('here')

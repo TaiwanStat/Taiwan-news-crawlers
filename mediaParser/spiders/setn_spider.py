@@ -31,7 +31,6 @@ class SetnSpider(scrapy.Spider):
             url = response.urljoin(url)
             yield scrapy.Request(url, callback=self.parse_news, meta=meta)
 
-        # Auto-parse next page
         last_two_pages = response.css('.pager a::attr(href)').extract()[-2:]
         page1 = last_two_pages[0].split('&p=')[1]
         page2 = last_two_pages[1].split('&p=')[1]
