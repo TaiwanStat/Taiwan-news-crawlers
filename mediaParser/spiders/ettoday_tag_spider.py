@@ -1,4 +1,5 @@
 """
+Ettoday tag
 the crawl deal with tags of ettoday's news, which could make the dictionary of jieba
 Usage: scrapy crawl ettoday_tag -o <filename.json>
 """
@@ -11,6 +12,7 @@ TODAY = datetime.date.today().strftime('%Y/%m/%d')
 TODAY_URL = datetime.date.today().strftime('%Y-%m-%d')
 ROOT_URL = 'http://www.ettoday.net'
 OLDEST_DATA_YEAR = 2012
+NEWS_DATE_BEGIN = datetime.date(OLDEST_DATA_YEAR, 1, 1)
 
 
 class EttodaySpider(scrapy.Spider):
@@ -18,7 +20,6 @@ class EttodaySpider(scrapy.Spider):
 
     def start_requests(self):
         day = datetime.timedelta(days=1)
-        NEWS_DATE_BEGIN = datetime.date(OLDEST_DATA_YEAR, 1, 1)
         current_time = NEWS_DATE_BEGIN
 
         while current_time <= datetime.date.today():
@@ -28,8 +29,8 @@ class EttodaySpider(scrapy.Spider):
                 'iter_time': 0,
                 'date_str': current_time.strftime('%Y/%m/%d')
             }
-            yield scrapy.Request(url, callback=self.parse_news_list, meta=meta)
             current_time += day
+            yield scrapy.Request(url, callback=self.parse_news_list, meta=meta)
 
     def parse_news_list(self, response):
         has_next_page = True
