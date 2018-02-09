@@ -1,4 +1,5 @@
 """
+公視新聞
 the crawl deal with pts's news
 Usage: scrapy crawl pts -o <filename.json>
 """
