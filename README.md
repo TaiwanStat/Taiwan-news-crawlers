@@ -16,7 +16,7 @@
 ## Getting Started
 
 ```
-$ pip3 install -v scrapy==1.3.0
+$ pip install -r requirements.txt
 $ git clone https://github.com/TaiwanStat/Taiwan-news-crawlers.git
 $ cd Taiwan-news-crawlers
 $ scrapy crawl apple -o apple_news.json
