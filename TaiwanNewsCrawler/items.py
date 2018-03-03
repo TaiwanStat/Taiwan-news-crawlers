@@ -8,7 +8,7 @@
 import scrapy
 
 
-class MediaparserItem(scrapy.Item):
+class TaiwannewscrawlerItem(scrapy.Item):
     website = scrapy.Field()
     url = scrapy.Field()
     title = scrapy.Field()

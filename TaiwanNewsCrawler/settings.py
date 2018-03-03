@@ -10,14 +10,14 @@ from scrapy.exporters import JsonItemExporter
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = 'mediaParser'
+BOT_NAME = 'TaiwanNewsCrawler'
 
-SPIDER_MODULES = ['mediaParser.spiders']
-NEWSPIDER_MODULE = 'mediaParser.spiders'
+SPIDER_MODULES = ['TaiwanNewsCrawler.spiders']
+NEWSPIDER_MODULE = 'TaiwanNewsCrawler.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'mediaParser (+http://www.yourdomain.com)'
+#USER_AGENT = 'TaiwanNewsCrawler (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
@@ -95,5 +95,5 @@ class MyJsonItemExporter(JsonItemExporter):
         super(MyJsonItemExporter, self).__init__(file, ensure_ascii=False, **kwargs)
 
 FEED_EXPORTERS = {
-    'json': 'mediaParser.settings.MyJsonItemExporter',
+    'json': 'TaiwanNewsCrawler.settings.MyJsonItemExporter',
 }
