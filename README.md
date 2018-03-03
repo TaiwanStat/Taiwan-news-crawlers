@@ -16,9 +16,9 @@
 ## Getting Started
 
 ```
-$ pip install -r requirements.txt
 $ git clone https://github.com/TaiwanStat/Taiwan-news-crawlers.git
 $ cd Taiwan-news-crawlers
+$ pip install -r requirements.txt
 $ scrapy crawl apple -o apple_news.json
 ```
 
