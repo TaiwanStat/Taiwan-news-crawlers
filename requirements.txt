@@ -1,1 +1,2 @@
 scrapy==1.3.0
+Twisted==16.6.0
