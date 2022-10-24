@@ -1,2 +1,2 @@
-scrapy==1.3.0
-Twisted==16.6.0
+scrapy==2.7.0
+Twisted==22.8.0
