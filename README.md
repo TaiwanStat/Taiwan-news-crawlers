@@ -25,13 +25,14 @@ $ scrapy crawl apple -o apple_news.json
 ## Prerequisites
 
 - Python3
-- Scrapy 1.3.0
+- Scrapy >= 1.3.0
+- Twisted >= 16.6.0
 
 ## Usage
 ```scrapy crawl <spider> -o <output_name>```
 ### Available spiders
-1. apple
-2. appleRealtime
+1. apple (not update since 2022/09/01)
+2. appleRealtime (not update since 2022/09/01)
 3. china
 4. cna
 5. cts
