@@ -63,7 +63,7 @@ class ChinaSpider(scrapy.Spider):
 
         # description
         try:
-            description = response.css('meta[property=og:description]::attr(content)').extract_first()
+            description = response.css("meta[property='og:description']::attr(content)").extract_first()
         except:
             description = ""
 
