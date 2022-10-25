@@ -23,11 +23,11 @@ class ChinaSpider(scrapy.Spider):
         start_date, end_date = utils.parse_start_date_and_end_date(self.start_date, self.end_date)
 
         crawl_next = False
-        news_in_page = response.css('ul.vertical-list li')
-        if not news_in_page:
+        all_news = response.css('ul.vertical-list li')
+        if not all_news:
             return
 
-        for news in news_in_page:
+        for news in all_news:
             news_date = utils.parse_date(news.css('time::attr(datetime)').extract_first())
             if (news_date is None):
                 continue
@@ -61,11 +61,18 @@ class ChinaSpider(scrapy.Spider):
 
         category = response.css('meta[name=section]::attr(content)').extract_first()
 
+        # description
+        try:
+            description = response.css('meta[property=og:description]::attr(content)').extract_first()
+        except:
+            description = ""
+
         yield {
             'website': "中國時報",
             'url': response.url,
             'title': title,
             'date': date_of_news,
             'content': content,
-            'category': category
+            'category': category,
+            'description': description
         }
