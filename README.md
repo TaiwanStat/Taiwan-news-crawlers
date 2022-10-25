@@ -30,19 +30,19 @@ $ scrapy crawl apple -o apple_news.json
 
 ## Usage
 ```scrapy crawl <spider> -o <output_name>```
-### Available spiders
-1. apple (not update since 2022/09/01)
-2. appleRealtime (not update since 2022/09/01)
-3. china
-4. cna
-5. cts
-6. ettoday
-7. liberty
-8. libertyRealtime
-9. pts
-10. setn
-11. tvbs
-12. udn
+### Available spiders (all 12)
+[ ] apple (not update since 2022/09/01)
+[ ] appleRealtime (not update since 2022/09/01)
+[X] china
+[X] cna
+[ ] cts
+[ ] ettoday
+[ ] liberty
+[ ] libertyRealtime
+[ ] pts
+[ ] setn
+[ ] tvbs
+[ ] udn
 
 ## Output
 | Key | Value |
