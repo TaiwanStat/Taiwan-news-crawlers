@@ -2,20 +2,21 @@ from typing import (Union, Tuple)
 import datetime as dt
 
 TODAY = dt.datetime.strptime(dt.datetime.now().strftime("%Y-%m-%d"), '%Y-%m-%d')
+YESTERDAY = TODAY - dt.timedelta(days=1)
 PARSE_DATE_FORMAT_LIST = ["%Y-%m-%d", "%Y/%m/%d", "%Y %m %d"]
 PARSE_TIME_FORMAT_LIST = ["%H %M", "%H:%M", "%H %M %S", "%H:%M:%S"]
 
 
-def parse_start_date_and_end_date(start_date: Union[str, None], end_date: Union[str, None]) -> Tuple[dt.datetime, dt.datetime]:
+def parse_start_date_and_end_date(start_date: Union[str, None], end_date: Union[str, None], start_date_default: dt.datetime=TODAY, end_date_default: dt.datetime=TODAY) -> Tuple[dt.datetime, dt.datetime]:
     if (not start_date is None):
         start_date = dt.datetime.strptime(start_date, '%Y-%m-%d')
     else:
-        start_date = TODAY
+        start_date = start_date_default
 
     if (not end_date is None):
         end_date = dt.datetime.strptime(end_date, '%Y-%m-%d')
     else:
-        end_date = TODAY
+        end_date = end_date_default
     end_date += dt.timedelta(days=1)
     return (start_date, end_date)
 
