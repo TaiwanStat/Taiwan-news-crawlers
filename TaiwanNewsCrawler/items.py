@@ -15,3 +15,4 @@ class TaiwannewscrawlerItem(scrapy.Item):
     date = scrapy.Field()
     content = scrapy.Field()
     category = scrapy.Field()
+    description = scrapy.Field()
