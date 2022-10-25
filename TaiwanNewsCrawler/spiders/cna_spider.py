@@ -6,6 +6,7 @@ Usage: scrapy crawl cna -o <filename.json>
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import scrapy
+import scrapy.http
 import json
 import TaiwanNewsCrawler.utils as utils
 
@@ -45,7 +46,7 @@ class CnaSpider(scrapy.Spider):
         if (crawl_next):
             API_POST_DATA["pageidx"] += 1
             # use api to get more news
-            # yield scrapy.Request(API_URL, method='POST', body=json.dumps(API_POST_DATA), callback=self.parse_api, headers={'Content-Type':'application/json'})
+            # yield scrapy.http.Request(API_URL, method='POST', body=json.dumps(API_POST_DATA), callback=self.parse_api, headers={'Content-Type':'application/json'})
 
     def parse_news(self, response: scrapy.Selector):
         title = response.css('h1 span::text').extract_first()
@@ -55,7 +56,7 @@ class CnaSpider(scrapy.Spider):
         for p in response.css('div.centralContent div.paragraph p'):
             p_text = p.css('::text')
             if p_text:
-                content += ''.join(p_text.extract())
+                content += ' '.join(p_text.extract())
 
         category = response.css('article.article::attr(data-origin-type-name)').extract_first()
 

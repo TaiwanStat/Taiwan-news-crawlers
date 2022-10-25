@@ -51,13 +51,13 @@ class ChinaSpider(scrapy.Spider):
 
     def parse_news(self, response: scrapy.Selector):
         title = response.css('h1::text').extract_first()
-        date_of_news_str = response.css('time::attr(datetime)').extract_first()
-        date_of_news = utils.parse_date(date_of_news_str, '%Y-%m-%d %H:%M')
+        date_str = response.css('time::attr(datetime)').extract_first()
+        date = utils.parse_date(date_str, '%Y-%m-%d %H:%M')
         content = ""
         for p in response.css('div.article-body p'):
             p_text = p.css('::text')
             if p_text:
-                content += ''.join(p_text.extract())
+                content += ' '.join(p_text.extract())
 
         category = response.css('meta[name=section]::attr(content)').extract_first()
 
@@ -71,7 +71,7 @@ class ChinaSpider(scrapy.Spider):
             'website': "中國時報",
             'url': response.url,
             'title': title,
-            'date': date_of_news,
+            'date': date,
             'content': content,
             'category': category,
             'description': description
