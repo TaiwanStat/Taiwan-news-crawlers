@@ -7,6 +7,7 @@ Usage: scrapy crawl cts -o <filename.json>
 # -*- coding: utf-8 -*-
 import scrapy
 import scrapy.http
+from urllib.parse import urljoin
 import datetime as dt
 import json
 import TaiwanNewsCrawler.utils as utils
@@ -34,7 +35,7 @@ class CtsSpider(scrapy.Spider):
         for news in response:
             url = news["news_url"]
             if (not ROOT_URL in url):
-                url = ROOT_URL + url
+                url = urljoin(ROOT_URL, url)
             yield scrapy.Request(url, callback=self.parse_news)
 
     def parse_news(self, response: scrapy.Selector):
@@ -43,7 +44,7 @@ class CtsSpider(scrapy.Spider):
         date = utils.parse_date(date_str, "%Y/%m/%d %H:%M")
         content = ""
         for p in response.css('artical.news-artical div.artical-content p'):
-            if (len(p.css("::attr(href)")) == 0 or len(p.css("::attr(class)"))):
+            if (len(p.css("::attr(href)")) == 0 or len(p.css("::attr(class)")) == 0):
                 p_text = p.css('::text')
                 content += ' '.join(p_text.extract())
 

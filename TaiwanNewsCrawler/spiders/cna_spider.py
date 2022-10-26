@@ -7,7 +7,7 @@ Usage: scrapy crawl cna -o <filename.json>
 # -*- coding: utf-8 -*-
 import scrapy
 import scrapy.http
-import json
+from urllib.parse import urljoin
 import TaiwanNewsCrawler.utils as utils
 
 
@@ -39,8 +39,7 @@ class CnaSpider(scrapy.Spider):
             if (crawl_next):
                 url = news.css('a::attr(href)').extract_first()
                 if (not ROOT_URL in url):
-                    url = ROOT_URL + url
-                url = response.urljoin(url)
+                    url = urljoin(ROOT_URL, url)
                 yield scrapy.Request(url, callback=self.parse_news)
 
         if (crawl_next):

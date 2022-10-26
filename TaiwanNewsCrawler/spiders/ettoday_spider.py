@@ -7,6 +7,7 @@ Usage: scrapy crawl ettoday -o <filename.json>
 import scrapy
 import scrapy.http
 import datetime as dt
+from urllib.parse import urljoin
 import TaiwanNewsCrawler.utils as utils
 
 
@@ -38,12 +39,16 @@ class EttodaySpider(scrapy.Spider):
         is_first_iter = response.meta['iter_time'] == 1
         prefix = '.part_list_2' if is_first_iter else ''
         date_str = response.meta["date"].strftime("%Y/%m/%d")
+
         for news in response.css(prefix + ' h3'):
-            url = news.css('a::attr(href)').extract_first()
-            url = ROOT_URL + url
-            category = news.css('em::text').extract_first()
             news_date = utils.parse_date(news.css('span::text').extract_first())
             crawl_next = utils.can_crawl(news_date, start_date, end_date)
+
+            url = news.css('a::attr(href)').extract_first()
+            if (not ROOT_URL in url):
+                url = urljoin(ROOT_URL, url)
+            category = news.css('em::text').extract_first()
+            
 
             if (crawl_next):
                 response.meta['category'] = category
