@@ -39,9 +39,8 @@ $ scrapy crawl apple -o apple_news.json
 - [X] cts(can select date)
 - [X] ettoday(can select date)
 - [X] liberty
-- [ ] libertyRealtime
 - [X] pts
-- [ ] setn
+- [X] setn
 - [ ] tvbs
 - [ ] udn
 
