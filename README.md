@@ -31,14 +31,14 @@ $ scrapy crawl apple -o apple_news.json
 ## Usage
 ```scrapy crawl <spider> -o <output_name>```
 
-### Available spiders (all 12)
+### Available spiders (all 11)
 - [ ] apple (not update since 2022/09/01)
 - [ ] appleRealtime (not update since 2022/09/01)
 - [X] china
 - [X] cna
 - [X] cts(can select date)
-- [X] ettoday
-- [ ] liberty
+- [X] ettoday(can select date)
+- [X] liberty
 - [ ] libertyRealtime
 - [ ] pts
 - [ ] setn
