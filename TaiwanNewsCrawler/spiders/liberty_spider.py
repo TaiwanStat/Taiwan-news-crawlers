@@ -5,11 +5,9 @@ Usage: scrapy crawl liberty -o <filename.json>
 """
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from requests import Response
 import scrapy
 import scrapy.http
 from urllib.parse import urljoin
-import datetime as dt
 import json
 import TaiwanNewsCrawler.utils as utils
 
