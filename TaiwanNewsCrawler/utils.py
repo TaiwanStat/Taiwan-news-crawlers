@@ -3,8 +3,10 @@ import datetime as dt
 
 TODAY = dt.datetime.strptime(dt.datetime.now().strftime("%Y-%m-%d"), '%Y-%m-%d')
 YESTERDAY = TODAY - dt.timedelta(days=1)
-PARSE_DATE_FORMAT_LIST = ["%Y-%m-%d", "%Y/%m/%d", "%Y %m %d"]
-PARSE_TIME_FORMAT_LIST = ["%H %M", "%H:%M", "%H %M %S", "%H:%M:%S"]
+PARSE_DATE_FORMAT_LIST = ["", "%Y-%m-%d", "%Y/%m/%d", "%Y %m %d"]
+PARSE_INTERVAL_FORMAT_LIST = ["", " ", "T"]
+PARSE_TIME_FORMAT_LIST = ["", "%H %M", "%H:%M", "%H %M %S", "%H:%M:%S"]
+PARSE_TIMEZONE_FORMAT_LIST = ["", "%z"]
 
 
 def parse_start_date_and_end_date(start_date: Union[str, None], end_date: Union[str, None], start_date_default: dt.datetime=TODAY, end_date_default: dt.datetime=TODAY) -> Tuple[dt.datetime, dt.datetime]:
@@ -23,17 +25,28 @@ def parse_start_date_and_end_date(start_date: Union[str, None], end_date: Union[
 
 def parse_date(date_str: str, parse_format: str=None) -> dt.datetime:
     if (not parse_format is None):
-        return dt.datetime.strptime(date_str, parse_format)
-    
+        try:
+            date = dt.datetime.strptime(date_str, parse_format)
+        except:
+            date = None
+        return date
+
+    date = None
     for date_format in PARSE_DATE_FORMAT_LIST:
-        for time_format in PARSE_TIME_FORMAT_LIST:
-            try:
-                date = dt.datetime.strptime(date_str, f"{date_format} {time_format}")
-                break
-            except:
-                date = None
         if (not date is None):
             break
+        for interval_format in PARSE_INTERVAL_FORMAT_LIST:
+            if (not date is None):
+                break
+            for time_format in PARSE_TIME_FORMAT_LIST:
+                if (not date is None):
+                    break
+                for timezone_format in PARSE_TIMEZONE_FORMAT_LIST:
+                    try:
+                        date = dt.datetime.strptime(date_str, f"{date_format}{interval_format}{time_format}{timezone_format}")
+                        break
+                    except:
+                        date = None
     return date
 
 
