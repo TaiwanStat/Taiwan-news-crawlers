@@ -44,7 +44,7 @@ class CtsSpider(scrapy.Spider):
         date = utils.parse_date(date_str, "%Y/%m/%d %H:%M")
         content = ""
         for p in response.css('artical.news-artical div.artical-content p'):
-            if (len(p.css("::attr(href)")) == 0 or len(p.css("::attr(class)")) == 0):
+            if (len(p.css("::attr(href)")) == 0 and len(p.css("::attr(class)")) == 0):
                 p_text = p.css('::text')
                 content += ' '.join(p_text.extract())
 

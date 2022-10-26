@@ -7,7 +7,6 @@ Usage: scrapy crawl pts -o <filename.json>
 # -*- coding: utf-8 -*-
 import scrapy
 from urllib.parse import urljoin
-import json
 import TaiwanNewsCrawler.utils as utils
 
 ROOT_URL = 'https://news.pts.org.tw/'
@@ -37,6 +36,8 @@ class PtsSpider(scrapy.Spider):
 
                 if (crawl_next):
                     url = news.css("h2 a::attr(href)").extract_first()
+                    if (not ROOT_URL in url):
+                        url = urljoin(ROOT_URL, url)
                     yield scrapy.Request(url, callback=self.parse_news)
         
         if (crawl_next):
@@ -61,7 +62,7 @@ class PtsSpider(scrapy.Spider):
 
         content = ""
         for p in article:
-            if (len(p.css("::attr(href)")) == 0 or len(p.css("::attr(class)")) == 0 or p.css("::attr(lang)") == "zh-TW"):
+            if ((len(p.css("::attr(href)")) == 0 and len(p.css("::attr(class)")) == 0) or p.css("::attr(lang)") == "zh-TW"):
                 p_text = p.css('::text')
                 content += ' '.join(p_text.extract())
 
