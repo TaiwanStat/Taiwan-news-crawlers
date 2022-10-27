@@ -55,7 +55,6 @@ class TvbsSpider(scrapy.Spider):
                 break
 
         content = ""
-        print(article.css("::text"))
         for p in article.css("::text").extract():
             if (len(p) > 0 and p[0] != "\n"):
                 content += p
@@ -71,6 +70,12 @@ class TvbsSpider(scrapy.Spider):
         except:
             description = ""
 
+        # key_word
+        try:
+            key_word = response.css("meta[name=news_keywords]::attr(content)").extract_first()
+        except:
+            key_word = ""
+            
         yield {
             'website': "TVBS",
             'url': response.url,
@@ -78,5 +83,6 @@ class TvbsSpider(scrapy.Spider):
             'date': date,
             'content': content,
             'category': category,
-            "description": description
+            "description": description,
+            "key_word": key_word
         }

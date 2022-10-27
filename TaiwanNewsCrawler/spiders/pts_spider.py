@@ -74,6 +74,21 @@ class PtsSpider(scrapy.Spider):
         except:
             description = ""
 
+        # key_word
+        try:
+            key_word_list = response.css("div.main-info ul.tag-list li.blue-tag")
+            key_word = ""
+            for li in key_word_list:
+                class_list = li.css("::attr(class)").extract_first()
+                if (not "more-tag" in class_list):
+                    text = li.css("a::text").extract_first()
+                    if (len(key_word) == 0):
+                        key_word += f"{text}"
+                    else:
+                        key_word += f",{text}"
+        except:
+            key_word = ""
+            
         yield {
             'website': "公視",
             'url': response.url,
@@ -81,5 +96,6 @@ class PtsSpider(scrapy.Spider):
             'date': date,
             'content': content,
             'category': category,
-            "description": description
+            "description": description,
+            "key_word": key_word
         }

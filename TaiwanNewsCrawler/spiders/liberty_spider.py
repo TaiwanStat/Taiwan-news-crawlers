@@ -72,7 +72,7 @@ class LibertySpider(scrapy.Spider):
 
         content = ""
         for p in article:
-            if (len(p.css("::attr(href)")) == 0 or len(p.css("::attr(class)")) == 0 or p.css("::attr(lang)") == "zh-TW"):
+            if ((len(p.css("::attr(href)")) == 0 or len(p.css("::attr(class)")) == 0) or p.css("::attr(lang)") == "zh-TW"):
                 p_text = p.css('::text')
                 content += ' '.join(p_text.extract())
 
@@ -84,6 +84,12 @@ class LibertySpider(scrapy.Spider):
         except:
             description = ""
 
+        # key_word
+        try:
+            key_word = response.css("meta[name=news_keywords]::attr(content)").extract_first()
+        except:
+            key_word = ""
+            
         yield {
             'website': "自由時報",
             'url': response.url,
@@ -91,5 +97,6 @@ class LibertySpider(scrapy.Spider):
             'date': date,
             'content': content,
             'category': category,
-            "description": description
+            "description": description,
+            "key_word": key_word
         }

@@ -68,6 +68,12 @@ class ChinaSpider(scrapy.Spider):
         except:
             description = ""
 
+        # key_word
+        try:
+            key_word = response.css("meta[name=keywords]::attr(content)").extract_first()
+        except:
+            key_word = ""
+
         yield {
             'website': "中國時報",
             'url': response.url,
@@ -75,5 +81,6 @@ class ChinaSpider(scrapy.Spider):
             'date': date,
             'content': content,
             'category': category,
-            'description': description
+            'description': description,
+            "key_word": key_word
         }

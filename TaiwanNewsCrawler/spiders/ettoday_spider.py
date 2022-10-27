@@ -94,6 +94,12 @@ class EttodaySpider(scrapy.Spider):
         except:
             description = ""
 
+        # key_word
+        try:
+            key_word = response.css("meta[name=news_keywords]::attr(content)").extract_first()
+        except:
+            key_word = ""
+            
         yield {
             'website': "東森新聞雲",
             'url': response.url,
@@ -101,5 +107,6 @@ class EttodaySpider(scrapy.Spider):
             'date': date,
             'content': content,
             'category': category,
-            "description": description
+            "description": description,
+            "key_word": key_word
         }

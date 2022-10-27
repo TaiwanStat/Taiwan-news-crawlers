@@ -13,6 +13,7 @@ import json
 import TaiwanNewsCrawler.utils as utils
 
 ROOT_URL = "https://news.cts.com.tw"
+PAGE_URL = "https://news.cts.com.tw/real/index.html"
 API_URL = "https://news.cts.com.tw/api/news/{}/daylist-news.json"
 
 class CtsSpider(scrapy.Spider):
@@ -56,6 +57,12 @@ class CtsSpider(scrapy.Spider):
         except:
             description = ""
 
+        # key_word
+        try:
+            key_word = response.css("meta[name=keywords]::attr(content)").extract_first()
+        except:
+            key_word = ""
+            
         yield {
             'website': "華視",
             'url': response.url,
@@ -63,7 +70,8 @@ class CtsSpider(scrapy.Spider):
             'date': date,
             'content': content,
             'category': category,
-            "description": description
+            "description": description,
+            "key_word": key_word
         }
 
     
