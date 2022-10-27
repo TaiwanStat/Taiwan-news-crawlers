@@ -1,7 +1,7 @@
 # Taiwan-news-crawlers
 
 🐞 [Scrapy](https://scrapy.org)-based Crawlers for news of Taiwan including 10 media companies:
-1. 蘋果日報
+1. 蘋果日報(2022/09/01開始不再更新)
 2. 中國時報
 3. 中央社
 4. 華視
@@ -16,7 +16,7 @@
 ## Getting Started
 
 ```
-$ git clone https://github.com/TaiwanStat/Taiwan-news-crawlers.git
+$ git clone https://github.com/cool9203/Taiwan-news-crawlers.git
 $ cd Taiwan-news-crawlers
 $ pip install -r requirements.txt
 $ scrapy crawl apple -o apple_news.json
@@ -32,17 +32,20 @@ $ scrapy crawl apple -o apple_news.json
 ```scrapy crawl <spider> -o <output_name>```
 
 ### Available spiders (all 11)
-- [ ] apple (not update since 2022/09/01)
-- [ ] appleRealtime (not update since 2022/09/01)
-- [X] china
-- [X] cna
-- [X] cts(can select date)
-- [X] ettoday(can select date)
-- [X] liberty
-- [X] pts
-- [X] setn
-- [X] tvbs(can select date)
-- [X] udn(can select date)
+
+| Spider name | Rewrite finished | Can crawl old day | Key word(tag) | note |
+| :--------: | :--------: | :--------: | :--------: | :--------: |
+| apple | :x: | :x: | :x: | stop update since 2022/09/01 |
+| appleRealtime | :x: | :x: | :x: | stop update since 2022/09/01 |
+| china | :heavy_check_mark: | :x: | :heavy_check_mark: |  |
+| cna | :heavy_check_mark: | :x: | :white_check_mark: | not always crawl key word |
+| cts | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | always crawl yesterday |
+| ettoday | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  |
+| liberty | :heavy_check_mark: | :x: | :heavy_check_mark: |  |
+| pts | :heavy_check_mark: | :x: | :heavy_check_mark: |  |
+| setn | :heavy_check_mark: | :x: | :heavy_check_mark: |  |
+| tvbs | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  |
+| udn | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  |
 
 ## Output
 | Key | Value |
@@ -52,6 +55,8 @@ $ scrapy crawl apple -o apple_news.json
 | title     | the news title|
 | content   | the news content      |
 | category  | the category of news |
+| description  | the description of news |
+| key_word  | the key_word of news |
 
 ## License
 The MIT License
