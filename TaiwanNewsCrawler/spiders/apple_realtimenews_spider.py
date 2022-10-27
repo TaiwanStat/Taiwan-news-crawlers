@@ -1,6 +1,7 @@
 """
 蘋果日報即時新聞
-the crawl deal with apple's realtime news
+the crawl deal with apple's realtime news.
+apple's news will not update since 2022/09/01
 Usage: scrapy crawl appleRealtime -o <filename.json>
 """
 #!/usr/bin/env python
