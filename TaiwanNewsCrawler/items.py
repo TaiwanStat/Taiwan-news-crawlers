@@ -16,3 +16,4 @@ class TaiwannewscrawlerItem(scrapy.Item):
     content = scrapy.Field()
     category = scrapy.Field()
     description = scrapy.Field()
+    key_word = scrapy.Field()
