@@ -8,6 +8,7 @@ Usage: scrapy crawl cna -o <filename.json>
 import scrapy
 import scrapy.http
 from urllib.parse import urljoin
+import json
 import TaiwanNewsCrawler.utils as utils
 
 
@@ -45,7 +46,29 @@ class CnaSpider(scrapy.Spider):
         if (crawl_next):
             API_POST_DATA["pageidx"] += 1
             # use api to get more news
-            # yield scrapy.http.Request(API_URL, method='POST', body=json.dumps(API_POST_DATA), callback=self.parse_api, headers={'Content-Type':'application/json'})
+            yield scrapy.http.Request(API_URL, method='POST', body=json.dumps(API_POST_DATA), callback=self.parse_api, headers={"Content-Type": "application/json", "Accept": "application/json"})
+
+    def parse_api(self, response):
+        start_date, end_date = utils.parse_start_date_and_end_date(self.start_date, self.end_date)
+        crawl_next = False
+        response_data = json.loads(response.text)
+
+        if (response_data["Result"].lower() == "y"):
+            for news in response_data["ResultData"]["Items"]:
+                news_date = utils.parse_date(news["CreateTime"])
+                if (news_date is None):
+                    continue
+                crawl_next = utils.can_crawl(news_date, start_date, end_date)
+
+                if (crawl_next):
+                    url = news["PageUrl"]
+                    if (not ROOT_URL in url):
+                        url = urljoin(ROOT_URL, url)
+                    yield scrapy.Request(url, callback=self.parse_news)
+
+            if (crawl_next):
+                API_POST_DATA["pageidx"] += 1
+                yield scrapy.http.Request(API_URL, method='POST', body=json.dumps(API_POST_DATA), callback=self.parse_api, headers={"Content-Type": "application/json", "Accept": "application/json"})
 
     def parse_news(self, response: scrapy.Selector):
         title = response.css('h1 span::text').extract_first()
