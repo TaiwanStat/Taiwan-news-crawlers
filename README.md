@@ -24,9 +24,12 @@ $ scrapy crawl apple -o apple_news.json
 
 ## Prerequisites
 
-- Python3
+- Python3.7+
 - Scrapy >= 1.3.0 ~ 2.7.0
 - Twisted >= 16.6.0 ~ 22.8.0
+- isort
+- flake8
+- black
 
 ## Usage
 
@@ -44,12 +47,10 @@ scrapy crawl <spider> -o <output_name> -a start_date=2022-10-26 -a end_date=2022
 scrapy crawl <spider> -o <output_name> -a start_date=2022-10-25
 ```
 
-### Available spiders (all 11)
+### Available spiders (all 10)
 
 | Spider name | Rewrite finished and can crawl | Can crawl assign day | Can crawl old day | Key word(tag) | note |
 | :--------: | :--------: | :--------: | :--------: | :--------: | :--------: |
-| apple(changes to next apple) | :x: | :x: | :x: | :x: | stop update since 2022/09/01 |
-| appleRealtime | :x: | :x: | :x: | :x: | stop update since 2022/09/01 |
 | china | :heavy_check_mark: | :x: | :x: | :heavy_check_mark: |  |
 | cna | :heavy_check_mark: | :x: | :x: | :white_check_mark: | not always crawl key word |
 | cts | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | always crawl yesterday |

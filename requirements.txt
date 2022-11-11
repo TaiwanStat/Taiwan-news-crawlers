@@ -1,2 +1,5 @@
 scrapy==2.7.0
 Twisted==22.8.0
+isort
+yapf
+black
