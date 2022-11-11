@@ -56,7 +56,7 @@ class NextAppleSpider(scrapy.Spider):
             date_str = response.css('time::text').extract_first()
         date = utils.parse_date(date_str).replace(tzinfo=None)
         
-        parse_text_list = ["div.main-content div.post-content p",
+        parse_text_list = ["div#main-content div.post-content p",
                             ]
                             
         for parse_text in parse_text_list:
