@@ -27,7 +27,7 @@ def run(test):
             if CRAWL_TODAY:
                 cmd = f"scrapy crawl {name} -o all-crawl-news/{name}/{name}_{date_str}.json -L ERROR"
             else:
-                cmd = f"scrapy crawl {name} -o all-crawl-news/{name}/{name}_{date_str}.json -a start_date={date_str} -a end_date={date_str} -L ERROR"  # noqa
+                cmd = f"scrapy crawl {name} -o all-crawl-news/{name}/{name}_{date_str}.json -a start_date={date_str} -a end_date={date_str} -L ERROR"  # fmt: skip
             if len(ENV_PATH) > 0:
                 cmd = f"{ENV_PATH} -m {cmd}"
             if test:
