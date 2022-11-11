@@ -1,75 +1,91 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 TVBS
 the crawl deal with tvbs's news
 Usage: scrapy crawl tvbs -o <filename.json>
 """
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-import re
-from datetime import date
-from datetime import timedelta
+import datetime as dt
+from urllib.parse import urljoin
 
 import scrapy
 
-YESTERDAY = (date.today() - timedelta(1)).strftime('%Y/%m/%d')
-YESTERDAY = YESTERDAY.replace('/', '-')
+import TaiwanNewsCrawler.utils as utils
+
+ROOT_URL = "https://news.tvbs.com.tw"
+PAGE_URL = "https://news.tvbs.com.tw/realtime/news/{}"
 
 
 class TvbsSpider(scrapy.Spider):
     name = "tvbs"
-    start_urls = [
-        'http://news.tvbs.com.tw/news/realtime/all/{}/1'.format(YESTERDAY)
-    ]
+
+    def __init__(self, start_date: str = None, end_date: str = None):
+        super().__init__(start_date=start_date, end_date=end_date)
+
+    def start_requests(self):
+        start_date, end_date = utils.parse_start_date_and_end_date(self.start_date, self.end_date)
+        date = start_date
+
+        while date < end_date:
+            url = PAGE_URL.format(date.strftime("%Y-%m-%d"))
+            yield scrapy.Request(url, method="GET", callback=self.parse)
+            date += dt.timedelta(days=1)
 
     def parse(self, response):
-        for news in response.css('.realtime_news_content_titel'):
-            category = news.css('p::text').extract_first()
-            meta = {'category': category}
-            url = news.css('div a::attr(href)').extract_first()
-            url = response.urljoin(url)
-            yield scrapy.Request(url, callback=self.parse_news, meta=meta)
+        parse_text_list = ["main article div.list li"]
+        for parse_text in parse_text_list:
+            for news in response.css(parse_text):
+                url = news.css("a::attr(href)").extract_first()
+                if url is None:
+                    continue
+                if ROOT_URL not in url:
+                    url = urljoin(ROOT_URL, url)
+                yield scrapy.Request(url, callback=self.parse_news)
 
-        total_pages = response.css(
-            '.realtime_news_underbtn li:last-child::text').extract_first()
-        total_pages_num = int(total_pages[1:-1])
-        url_arr = response.url.split('/')
-        current_page_index = int(url_arr[-1])
+    def parse_news(self, response: scrapy.Selector):
+        title = response.css("h1::text").extract_first()
+        date_str = response.css("meta[name=pubdate]::attr(content)").extract_first()
+        if date_str is None:
+            date_str = response.css("meta[property='article:published_time']::attr(content)").extract_first()
+        date = utils.parse_date(date_str).replace(tzinfo=None)
 
-        if current_page_index < total_pages_num:
-            next_page_url = '/'.join(url_arr[:-1]) + \
-                '/' + str(current_page_index + 1)
-            yield scrapy.Request(next_page_url, callback=self.parse)
+        parse_text_list = [
+            "div[itemprop=articleBody] div.article_content",
+        ]
 
-    def parse_news(self, response):
-        title = response.css('.newsdetail-h2 p strong::text').extract_first()
-        date_of_news = response.css(
-            '.newsdetail-time1 p::text').extract_first()[:10]
-        raw_content = response.css('.newsdetail-content').extract_first()
+        for parse_text in parse_text_list:
+            article = response.css(parse_text)
+            if article is not None:
+                break
 
-        TAG_RE = re.compile(r'<[^>]+>([^<]*</[^>]+>)?')
+        content = ""
+        for p in article.css("::text").extract():
+            if len(p) > 0 and p[0] != "\n":
+                content += p
 
-        content_prefix = '<!-- 新聞主內容 -->'
-        content_suffix1 = '<strong>'
-        content_suffix2 = '<!--'
+        category = response.css("meta[name=section]::attr(content)").extract_first()
+        if category is None:
+            category = response.css("meta[property='article:section']::attr(content)").extract_first()
 
-        content = raw_content.split(content_prefix)[1]
+        # description
+        try:
+            description = response.css("meta[property='og:description']::attr(content)").extract_first()
+        except Exception as e:
+            description = ""
 
-        if content_suffix1 in content:
-            content = content.split(content_suffix1)[0]
-        elif content_suffix2 in content:
-            content = content.split(content_suffix2)[0]
-
-        content = content.replace('<br>', ' ')
-        content = content.replace('\n', ' ')
-        content = content.replace('\t', ' ')
-        content = TAG_RE.sub(' ', content)
-        content = content.strip()
+        # key_word
+        try:
+            key_word = response.css("meta[name=news_keywords]::attr(content)").extract_first()
+        except Exception as e:
+            key_word = ""
 
         yield {
-            'website': "tvbs",
-            'url': response.url,
-            'title': title,
-            'date': date_of_news,
-            'content': content,
-            'category': response.meta['category']
+            "website": "TVBS",
+            "url": response.url,
+            "title": title,
+            "date": date,
+            "content": content,
+            "category": category,
+            "description": description,
+            "key_word": key_word,
         }

@@ -1,23 +1,28 @@
-#!/usr/bin/env python
+#! /usr/bin/env python
 # -*- coding: utf-8 -*-
+
 """
-公視新聞
-the crawl deal with pts's news
-Usage: scrapy crawl pts -o <filename.json>
+# 蘋果日報新聞
+the crawl deal with apple's news
+apple's news will not update since 2022/09/01
+Usage: scrapy crawl apple -o <filename.json>
 """
 
+import datetime as dt
+import json
 from urllib.parse import urljoin
 
 import scrapy
+import scrapy.http
 
 import TaiwanNewsCrawler.utils as utils
 
-ROOT_URL = "https://news.pts.org.tw/"
-PAGE_URL = "https://news.pts.org.tw/dailynews?page={}"
+ROOT_URL = "https://tw.nextapple.com"
+PAGE_URL = "https://tw.nextapple.com/realtime/recommend/{}"
 
 
-class PtsSpider(scrapy.Spider):
-    name = "pts"
+class NextAppleSpider(scrapy.Spider):
+    name = "nextapple"
 
     def __init__(self, start_date: str = None, end_date: str = None):
         super().__init__(start_date=start_date, end_date=end_date)
@@ -32,17 +37,14 @@ class PtsSpider(scrapy.Spider):
         crawl_next = False
         response.meta["iter_time"] += 1
 
-        parse_text_list = [
-            "div.break-news-container div.breakingnews",
-            "div.break-news-container ul.news-list li.d-flex",
-        ]
+        parse_text_list = ["div.post-hot article"]
         for parse_text in parse_text_list:
             for news in response.css(parse_text):
-                news_date = utils.parse_date(news.css("time::attr(datetime)").extract_first())
+                news_date = utils.parse_date(news.css("div.post-inner div.post-meta time::text").extract_first())
                 crawl_next = utils.can_crawl(news_date, start_date, end_date)
 
                 if crawl_next:
-                    url = news.css("h2 a::attr(href)").extract_first()
+                    url = news.css("a::attr(href)").extract_first()
                     if ROOT_URL not in url:
                         url = urljoin(ROOT_URL, url)
                     yield scrapy.Request(url, callback=self.parse_news)
@@ -59,7 +61,7 @@ class PtsSpider(scrapy.Spider):
         date = utils.parse_date(date_str).replace(tzinfo=None)
 
         parse_text_list = [
-            "article.post-article p",
+            "div#main-content div.post-content p",
         ]
 
         for parse_text in parse_text_list:
@@ -73,7 +75,7 @@ class PtsSpider(scrapy.Spider):
                 p_text = p.css("::text")
                 content += " ".join(p_text.extract())
 
-        category = response.css("ol.breadcrumb li.breadcrumb-item")[-1].css("a::text").extract()[-1]
+        category = response.css("div.category::text").extract_first()
 
         # description
         try:
@@ -83,21 +85,12 @@ class PtsSpider(scrapy.Spider):
 
         # key_word
         try:
-            key_word_list = response.css("div.main-info ul.tag-list li.blue-tag")
-            key_word = ""
-            for li in key_word_list:
-                class_list = li.css("::attr(class)").extract_first()
-                if "more-tag" not in class_list:
-                    text = li.css("a::text").extract_first()
-                    if len(key_word) == 0:
-                        key_word += f"{text}"
-                    else:
-                        key_word += f",{text}"
+            key_word = response.css("meta[name=keywords]::attr(content)").extract_first()
         except Exception as e:
             key_word = ""
 
         yield {
-            "website": "公視",
+            "website": "壹蘋新聞網",
             "url": response.url,
             "title": title,
             "date": date,

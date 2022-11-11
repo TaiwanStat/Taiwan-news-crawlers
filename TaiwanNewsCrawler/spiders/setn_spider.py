@@ -1,69 +1,106 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 三立新聞
 the crawl deal with setn's news
 Usage: scrapy crawl setn -o <filename.json> -s DOWNLOAD_DELAY=0.1
 """
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-import re
-from datetime import date
-from datetime import timedelta
+
+from urllib.parse import urljoin
+
 import scrapy
 
-YESTERDAY = (date.today() - timedelta(1)).strftime('%m/%d/%Y')
+import TaiwanNewsCrawler.utils as utils
+
+ROOT_URL = "http://www.setn.com"
+PAGE_URL = "http://www.setn.com/ViewAll.aspx?p={}"
 
 
 class SetnSpider(scrapy.Spider):
     name = "setn"
 
-    def __init__(self, category=None, *args, **kwargs):
-        super(SetnSpider, self).__init__(*args, **kwargs)
-        self.start_urls = [
-            'http://www.setn.com/ViewAll.aspx?date={}&p=1'.format(YESTERDAY)
+    def __init__(self, start_date: str = None, end_date: str = None):
+        super().__init__(start_date=start_date, end_date=end_date)
+
+    def start_requests(self):
+        meta = {"iter_time": 1}
+        url = PAGE_URL.format(meta["iter_time"])
+        yield scrapy.Request(url, callback=self.parse, meta=meta)
+
+    def parse(self, response: scrapy.Selector):
+        crawl_next = False
+        response.meta["iter_time"] += 1
+
+        parse_text_list = ["#NewsList div.newsItems"]
+        for parse_text in parse_text_list:
+            for news in response.css(parse_text):
+                crawl_next = True
+
+                url = news.css("h3 a::attr(href)").extract_first()
+                if ROOT_URL not in url:
+                    url = urljoin(ROOT_URL, url)
+                yield scrapy.Request(url, callback=self.parse_news)
+
+        if crawl_next:
+            url = PAGE_URL.format(response.meta["iter_time"])
+            yield scrapy.Request(url, callback=self.parse, meta=response.meta)
+
+    def parse_news(self, response: scrapy.Selector):
+        start_date, end_date = utils.parse_start_date_and_end_date(self.start_date, self.end_date)
+        title = response.css("h1::text").extract_first()
+        date_str = response.css("meta[name=pubdate]::attr(content)").extract_first()
+        if date_str is None:
+            date_str = response.css("time::text").extract_first()
+        if date_str is None:
+            date_str = response.css("meta[property='article:published_time']::attr(content)").extract_first()
+        date = utils.parse_date(date_str).replace(tzinfo=None)
+
+        crawl = utils.can_crawl(date, start_date, end_date)
+        if not crawl:
+            return
+
+        parse_text_list = [
+            "article p",
         ]
-        self.last_page_flag = 0
 
-    def parse(self, response):
+        for parse_text in parse_text_list:
+            article = response.css(parse_text)
+            if article is not None:
+                break
 
-        for news in response.css('.box ul li'):
-            category = news.css('.tab_list_type span::text').extract_first()
-            meta = {'category': category}
-            url = news.css('a::attr(href)').extract_first()
-            url = response.urljoin(url)
-            yield scrapy.Request(url, callback=self.parse_news, meta=meta)
+        content = ""
+        for p in article:
+            if (
+                len(p.css("::attr(href)")) == 0
+                and len(p.css("::attr(class)")) == 0
+                and len(p.css("::attr(style)")) == 0
+            ) or p.css("::attr(lang)") == "zh-TW":
+                p_text = p.css("::text")
+                content += " ".join(p_text.extract())
 
-        last_two_pages = response.css('.pager a::attr(href)').extract()[-2:]
-        page1 = last_two_pages[0].split('&p=')[1]
-        page2 = last_two_pages[1].split('&p=')[1]
+        category = response.css("meta[name=section]::attr(content)").extract_first()
+        if category is None:
+            category = response.css("meta[property='article:section']::attr(content)").extract_first()
 
-        if page1 == page2:
-            self.last_page_flag = self.last_page_flag + 1
+        # description
+        try:
+            description = response.css("meta[property='og:description']::attr(content)").extract_first()
+        except Exception as e:
+            description = ""
 
-        if self.last_page_flag < 2:
-            url_arr = response.url.split('&p=')
-            current_page = int(url_arr[1])
-            next_page_url = '&p='.join(
-                url_arr[:-1]) + '&p=' + str(current_page + 1)
-            yield scrapy.Request(next_page_url, callback=self.parse)
-
-    def parse_news(self, response):
-        title = response.css('.title h1::text').extract_first()
-        content = ''
-        date_of_news = ''
-        if response.url.split('/')[3] == 'E':
-            date_of_news = response.css('.time::text').extract_first()[:10]
-            content = response.css('.Content2 p::text').extract()
-        else:
-            date_of_news = response.css('.date::text').extract_first()[:10]
-            content = response.css('#Content1 p::text').extract()
-
-        content = ''.join(content)
+        # key_word
+        try:
+            key_word = response.css("meta[name=news_keywords]::attr(content)").extract_first()
+        except Exception as e:
+            key_word = ""
 
         yield {
-            'website': "三立新聞",
-            'url': response.url,
-            'title': title,
-            'date': date_of_news,
-            'content': content,
-            'category': response.meta['category']
+            "website": "三立新聞",
+            "url": response.url,
+            "title": title,
+            "date": date,
+            "content": content,
+            "category": category,
+            "description": description,
+            "key_word": key_word,
         }
